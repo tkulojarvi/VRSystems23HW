@@ -8,6 +8,7 @@ TagManager:
   - VHSTapeTag
   - Left Hand
   - Right Hand
+  - Respawn Collider
   layers:
   - Default
   - TransparentFX
