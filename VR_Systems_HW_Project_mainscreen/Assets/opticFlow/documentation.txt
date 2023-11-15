@@ -1,4 +1,4 @@
-Optic flow is controller by 'Flow' script, that should be attached to camera / VR rig. The player can be placed anywhere and it will loop in place there, but by default the middle is good (0,0,50). To set up optic flow in different directions, change the starting rotation of the camera / VR rig appropriately (although VR still needs a way to make them look a certain way)
+Optic flow is controller by 'Flow' script, that should be attached to camera / VR rig. The player can be placed anywhere and it will loop in place there, but by default the middle is good (0,0,50). To set up optic flow in different directions, change the starting rotation of the camera / VR rig appropriately. This also applies to rotation (you can achieve the different variants by starting with either 0 rotation, 90 degree on x-axis or 90 degree on y-axis)
 
 Parameters:
 
@@ -28,4 +28,4 @@ Offset - Constant offset applied to the position of every instantiated object
 Alternating Offset - x-offset is applied to every other object on y-axis, and y-offset is applied to every other object on x-axis. z-offset is unused
 Random offset - Applies a random offset to each instantiated object, +- up to the specified amount on each axis
 
-Furthermore, the texture on the LineRenderer defines the shape of the objects, and the width of the LineRenderer can also be changed. Custom shader is used to darken the visuals based on distance.
+Furthermore, the texture on the LineRenderer defines the shape of the objects, and the width of the LineRenderer can also be changed. With the texture that is there, the shape can be customized in real-time by adjusting the alpha cutoff, where 1 equals a circle and going down from there makes it a line, where lower values equal a longer line. Custom shader is used to darken the visuals based on distance, as otherwise far objects would produce a lot of shimmering.

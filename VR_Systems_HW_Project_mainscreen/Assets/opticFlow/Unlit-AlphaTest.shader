@@ -59,7 +59,7 @@ SubShader {
                 fixed4 col = tex2D(_MainTex, i.texcoord);
                 clip(col.a - _Cutoff);
                 float zDepth = i.vertex.z / i.vertex.w;
-                col = col * zDepth * 2500;
+                col = col * zDepth * zDepth * 100000000;
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
