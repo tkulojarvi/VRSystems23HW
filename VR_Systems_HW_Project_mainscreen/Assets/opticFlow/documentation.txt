@@ -15,7 +15,7 @@ Acceleration Time - Duration of the acceleration period
 Random Acceleration Swing - Add or remove up to this amount from acceleration time on each iteration
 Deceleration Time - Duration of the deceleration period. Velocity and angular velocity linearly reverts back to 'Speed' and 'Rotation' during this period
 
-The visuals can be changed using the GridSpawner script, which can be found from the top toolbar in Unity, under 'Custom'. This will instantiate objects in a customizable grid on the xy-axis. Lengthy LineRenderers are used to fill the z-axis.
+The visuals can be changed using the GridSpawner script, which can be found from the top toolbar in Unity, under 'Custom'. This will instantiate objects in a customizable grid on the xy-axis. Lengthy LineRenderers are used to fill the z-axis. In addition, real time version of this script is attached to GridSpawner. If you try to make too big and rapid changes in real time, it could be laggy, but it should be fine. Enable the 'Refresh' boolean variable to make it spawn the objects with the new parameters while the program is running.
 
 Parameters:
 
