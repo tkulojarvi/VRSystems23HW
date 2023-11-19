@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 
+using UnityEngine.XR;
+
 /*
  * RoomSwitch
  * 
@@ -28,6 +30,8 @@ public class RoomSwitch : MonoBehaviour
 {
     // Singleton pattern
     public static RoomSwitch Instance;
+    // XR Input
+    private InputData _inputData;
 
     // Check if two minutes have passed - it is the minimum time the player is required to stay in the room
     public bool twoMinutes = false;
@@ -45,9 +49,23 @@ public class RoomSwitch : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        // Get a reference to the InputData script
+        _inputData = GetComponent<InputData>();
+    }
+
     void Update()
     {
         Scene currentScene = SceneManager.GetActiveScene();
+
+        if(_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool primaryButtonRight) && primaryButtonRight)
+        {
+            if(currentScene.name != "TAPE_CUSTOM")
+            {
+                ExitRoom();
+            }
+        }
 
         // KEYBOARD CONTROLS
         // Spacebar = Exit room
@@ -106,6 +124,7 @@ public class RoomSwitch : MonoBehaviour
     {
         // tapeNumber is the name of the scene to load
         SceneManager.LoadScene(tapeNumber);
+
 
         // disable leaderboard mesh
         Leaderboard.Instance.MeshDisabler();

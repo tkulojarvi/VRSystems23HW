@@ -5,6 +5,8 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
 
+using UnityEngine.XR;
+
 /*
  * CustomRoomUI
  * 
@@ -29,7 +31,8 @@ using UnityEngine.InputSystem;
  * - currentIndex: Index of the currently selected TextMeshPro object.
  * - increaseKeyDown, decreaseKeyDown: Flags indicating whether the increase or decrease key is currently held.
  * - timer, stage2timer: Timers used to control the speed of value adjustments.
- * - delay, stage2delay: Delays between value adjustments, with stage2delay indicating a faster adjustment.
+ * - delay: Delay between value adjustments, with stage2delay.
+ * - stage2delay: Time until indicating a faster adjustment.
  * - ParameterUI, Platform, TimerClock, LeftHand, RightHand: GameObjects representing UI elements in the scene.
  * - inMenu: Flag indicating whether the user is currently in the parameter adjustment menu.
  * 
@@ -47,6 +50,10 @@ using UnityEngine.InputSystem;
  * - StopMovementInMenu(): Stops the optic flow movement when in the parameter adjustment menu.
  * - StartScene(): Initiates the scene with the configured parameter values.
  * - ExitScene(): Exits either to the main menu or back to the parameter adjustment menu, based on the current state.
+ *
+ * 19/11/2023 NOTE! ADDED XR CONTROLS TO SCENE!
+ *
+ *
  */
 
 public class CustomRoomUI : MonoBehaviour
@@ -65,26 +72,32 @@ public class CustomRoomUI : MonoBehaviour
     // An array to store the values for each TextMeshPro object
     private float[] values;
     private int[] intValues;
-
     // Index of the currently selected TextMeshPro object
     private int currentIndex = 0;
+
     private bool increaseKeyDown = false;
     private bool decreaseKeyDown = false;
     private float timer = 0f;
     private float stage2timer = 0f;
-    private float delay = 0.1f; // Adjust the delay as needed
-    private float stage2delay = 2;
+    private float delay = 0.1f;
+    private float stage2delay = 1;
 
     public GameObject ParameterUI;
     public GameObject Platform;
     public GameObject TimerClock;
-    public GameObject LeftHand;
-    public GameObject RightHand;
 
     private bool inMenu;
 
+    // XR Input
+    private InputData _inputData;
+    float lastSelectionTime = 0f; // Initialize the last selection time
+
     void Start()
     {
+        // Get a reference to the InputData script
+        _inputData = GetComponent<InputData>();
+
+        // We are in the menu
         inMenu = true;
 
         // Get a referemce to the flow script to change values
@@ -116,23 +129,70 @@ public class CustomRoomUI : MonoBehaviour
 
     void Update()
     {
-        // Check for key presses
-        //rightArrowKey
+        // XR Input
+        // Left and Right
+        if (_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 leftRightVector))
+        {
+            float threshold = 0.5f; // Threshold for recognizing input
+            float cooldownTime = 0.25f; // Set the cooldown time to 1 second
+
+            if(leftRightVector.x > threshold && Time.time - lastSelectionTime >= cooldownTime)
+            {
+                // Execute only if the x-value is greater than the threshold and enough time has passed
+                SelectNextTextObject();
+                lastSelectionTime = Time.time; // Update the last selection time
+            }
+            else if(leftRightVector.x < -threshold && Time.time - lastSelectionTime >= cooldownTime)
+            {
+                SelectPreviousTextObject();
+                lastSelectionTime = Time.time; // Update the last selection time
+            }
+        }
+        
+        // Up and Down
+        if (_inputData._leftController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 upDownVector))
+        {
+            float threshold = 0.5f;
+
+            if (upDownVector.y > threshold) 
+            {
+                increaseKeyDown = true;
+            }
+            else if(upDownVector.y < -threshold)
+            {
+                decreaseKeyDown = true;
+            }
+
+            // Check for joystick release
+            // else = in the middle aka not pushing joystick
+            else
+            {
+                increaseKeyDown = false;
+                decreaseKeyDown = false;
+                timer = 0f; // Reset the timer when the joystick is released
+                stage2timer = 0f;
+                delay = 0.1f;
+            }
+        }
+
+        // KEYBOARD
+        // Keyboard probably doesn't work while controllers are active
+        // Right
         if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
             SelectNextTextObject();
         }
-        //leftArrowKey
+        // Left
         else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
             SelectPreviousTextObject();
         }
-        //upArrowKey
+        // Up
         else if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             increaseKeyDown = true;
         }
-        //downArrowKey
+        // Down
         else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
             decreaseKeyDown = true;
@@ -165,6 +225,18 @@ public class CustomRoomUI : MonoBehaviour
         }
 
         // Check for enter and exit
+        // XR Input
+        if(_inputData._leftController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool primaryButtonLeft) && primaryButtonLeft)
+        {
+            AssignValues();
+            StartScene();
+        }
+        if(_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool primaryButtonRight) && primaryButtonRight)
+        {
+            ExitScene();
+        }
+
+        // Keyboard
         if (Keyboard.current.enterKey.wasPressedThisFrame)
         {
             // If ENTER key pressed, START SCENE WITH THE USER PARAMETERS.
@@ -182,7 +254,7 @@ public class CustomRoomUI : MonoBehaviour
     {
         if(stage2timer >= stage2delay)
         {
-            delay = 0.01f;
+            delay = 0;
                 
         }
         if (timer >= delay)
@@ -201,7 +273,7 @@ public class CustomRoomUI : MonoBehaviour
     {
         if(stage2timer >= stage2delay)
         {
-            delay = 0.01f;
+            delay = 0;
                 
         }
         if (timer >= delay)
@@ -376,8 +448,7 @@ public class CustomRoomUI : MonoBehaviour
         Platform.SetActive(false);
         ParameterUI.SetActive(false);
         //TimerClock.SetActive(true);
-        LeftHand.SetActive(false);
-        RightHand.SetActive(false);
+        
 
         realtimeGrid.refresh = true;
 
@@ -392,8 +463,7 @@ public class CustomRoomUI : MonoBehaviour
             Platform.SetActive(true);
             ParameterUI.SetActive(true);
             //TimerClock.SetActive(false);
-            LeftHand.SetActive(true);
-            RightHand.SetActive(true);
+            
 
             inMenu = true;
             StopMovementInMenu();

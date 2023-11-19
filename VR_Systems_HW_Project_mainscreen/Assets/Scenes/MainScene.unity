@@ -4796,6 +4796,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1124258301}
   - component: {fileID: 1124258300}
+  - component: {fileID: 1124258302}
   m_Layer: 0
   m_Name: RoomSwitchManager
   m_TagString: Untagged
@@ -4831,6 +4832,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1124258302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1124258299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d62d4b7436e1d34e9f74b95966726e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1180532839
 GameObject:
   m_ObjectHideFlags: 0
@@ -6561,21 +6574,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'NUMBERS 1-9: ENTER SCENE
-
-
-    SPACEBAR: EXIT SCENE
-
-
-    CUSTOM:
-
-    ARROW
-    KEYS UP & DOWN TO CHANGE VALUES.
-
-    ARROW KEYS LEFT & RIGHT TO MOVE BETWEEN
-    PARAMETERS.
-
-    ENTER TO START SCENE WITH PARAMETERS.'
+  m_text: "NUMBERS 1-9: ENTER SCENE\nSPACEBAR/ A BUTTON: EXIT SCENE\n\nCUSTOM:\nARROW
+    KEYS UP & DOWN / LEFT JOYSTICK: CHANGE VALUES.\nARROW KEYS LEFT & RIGHT / RIGHT
+    JOYSTICK: \nMOVE BETWEEN PARAMETERS.\nENTER / X BUTTON: START SCENE WITH PARAMETERS."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f6b3248d1d76601439fa673c794f88f0, type: 2}
   m_sharedMaterial: {fileID: 1300955138511584800, guid: f6b3248d1d76601439fa673c794f88f0,
