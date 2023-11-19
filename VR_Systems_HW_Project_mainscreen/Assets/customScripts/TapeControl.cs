@@ -5,6 +5,38 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
+/*
+ * TapeControl
+ * 
+ * Overview:
+ * This script manages the behavior of a tape object. It handles tape properties such as rotation,
+ * respawn handling, and interactions with the XR grab system. The tape can rotate when not grabbed, respawn when dropped, and
+ * has a timer to trigger respawning if left untouched for a specified duration. The script uses XRGrabInteractable events
+ * to detect when the tape is grabbed or released and adjusts its behavior accordingly.
+ * 
+ * Components:
+ * - originalPosition: The original position of the tape.
+ * - originalRotation: The original rotation of the tape.
+ * - tapeRigidbody: Rigidbody component of the tape for physics interactions.
+ * - timerDuration: The duration in seconds before the tape respawns if left untouched.
+ * - dropped: Flag indicating whether the tape has been dropped.
+ * - rotationSpeed: The speed at which the tape rotates.
+ * - tapeName: The name of the tape object.
+ * - rotate: Flag indicating whether the tape should rotate.
+ * - grabbed: Flag indicating whether the tape is currently grabbed.
+ * 
+ * Functions:
+ * - Start(): Initializes the script by storing the original position and rotation, getting the tape's rigidbody,
+ *            getting the tape's name, and adding event listeners for grab interactions.
+ * - Update(): Manages the rotation of the tape when it is not grabbed.
+ * - OnTriggerEnter(Collider other): Detects if the tape collides with a respawn collider (floor) and triggers respawn if so.
+ * - RespawnTape(): Handles the respawning of the tape to its original position.
+ * - StartTimerCoroutine(): Coroutine to start the respawn timer when the tape is released.
+ * - SetGrabbedTrue(SelectEnterEventArgs args): Sets the grabbed flag to true when the tape is grabbed.
+ * - SetGrabbedFalse(SelectExitEventArgs args): Sets the grabbed flag to false when the tape is released and starts the respawn timer.
+ * 
+ */
+
 public class TapeControl : MonoBehaviour
 {
     // Variables to store initial position, rotation, and rigidbody of the tape
