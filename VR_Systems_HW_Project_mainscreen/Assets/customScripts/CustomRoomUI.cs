@@ -68,6 +68,9 @@ public class CustomRoomUI : MonoBehaviour
 
     // An array to hold references to your TextMeshPro objects
     public TextMeshProUGUI[] textObjects;
+
+    public GameObject smallMenuObject;
+    public TextMeshProUGUI smallMenuTitle, smallMenuText;
     
     // An array to store the values for each TextMeshPro object
     private float[] values;
@@ -85,6 +88,15 @@ public class CustomRoomUI : MonoBehaviour
     public GameObject ParameterUI;
     public GameObject Platform;
     public GameObject TimerClock;
+
+    int smallMenuIndex = 0;
+    int[] smallMenu = { 3,  //speed
+                        0,  //rotation
+                        0,  //direction
+                        0,  //acceleration
+                        2,  //grid density
+                        1 };//object shape
+    string[] smallMenuNames = { "Speed", "Rotation", "Direction", "Acceleration", "Grid Density", "Object Shape" };
 
     private bool inMenu;
 
@@ -129,36 +141,37 @@ public class CustomRoomUI : MonoBehaviour
 
     void Update()
     {
+        smallMenuObject.SetActive(!inMenu);
         // XR Input
         // Left and Right
-        if (_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 leftRightVector))
+        if (_inputData._leftController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 leftAnalog))
         {
             float threshold = 0.5f; // Threshold for recognizing input
             float cooldownTime = 0.25f; // Set the cooldown time to 1 second
 
-            if(leftRightVector.x > threshold && Time.time - lastSelectionTime >= cooldownTime)
+            if((leftAnalog.x > threshold || leftAnalog.y < -threshold) && Time.time - lastSelectionTime >= cooldownTime)
             {
                 // Execute only if the x-value is greater than the threshold and enough time has passed
-                SelectNextTextObject();
+                SelectNextTextObject(1);
                 lastSelectionTime = Time.time; // Update the last selection time
             }
-            else if(leftRightVector.x < -threshold && Time.time - lastSelectionTime >= cooldownTime)
+            else if((leftAnalog.x < -threshold || leftAnalog.y > threshold) && Time.time - lastSelectionTime >= cooldownTime)
             {
-                SelectPreviousTextObject();
+                SelectNextTextObject(-1);
                 lastSelectionTime = Time.time; // Update the last selection time
             }
         }
         
         // Up and Down
-        if (_inputData._leftController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 upDownVector))
+        if (_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 rightAnalog))
         {
             float threshold = 0.5f;
 
-            if (upDownVector.y > threshold) 
+            if (rightAnalog.y > threshold || rightAnalog.x > threshold) 
             {
                 increaseKeyDown = true;
             }
-            else if(upDownVector.y < -threshold)
+            else if(rightAnalog.y < -threshold || rightAnalog.x < -threshold)
             {
                 decreaseKeyDown = true;
             }
@@ -180,12 +193,12 @@ public class CustomRoomUI : MonoBehaviour
         // Right
         if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
-            SelectNextTextObject();
+            SelectNextTextObject(1);
         }
         // Left
         else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
-            SelectPreviousTextObject();
+            SelectNextTextObject(-1);
         }
         // Up
         else if (Keyboard.current.upArrowKey.wasPressedThisFrame)
@@ -217,11 +230,11 @@ public class CustomRoomUI : MonoBehaviour
         // Adjust the values continuously while the keys are held down
         if (increaseKeyDown)
         {
-            IncreaseKey();
+            IncreaseKey(1);
         }
         else if (decreaseKeyDown)
         {
-            DecreaseKey();
+            IncreaseKey(-1);
         }
 
         // Check for enter and exit
@@ -250,7 +263,7 @@ public class CustomRoomUI : MonoBehaviour
         }
     }
 
-    void IncreaseKey()
+    void IncreaseKey(int amount)
     {
         if(stage2timer >= stage2delay)
         {
@@ -259,7 +272,7 @@ public class CustomRoomUI : MonoBehaviour
         }
         if (timer >= delay)
         {
-            IncreaseValue();
+            IncreaseValue(amount);
             timer = 0f; // Reset the timer after the delay
         }
         else
@@ -269,43 +282,63 @@ public class CustomRoomUI : MonoBehaviour
         }
     }
 
-    void DecreaseKey()
+    void SelectNextTextObject(int dir)
     {
-        if(stage2timer >= stage2delay)
+        if (!inMenu)
         {
-            delay = 0;
-                
+            smallMenuIndex = (smallMenuIndex + dir + smallMenu.Length) % smallMenu.Length;
         }
-        if (timer >= delay)
-        {
-            DecreaseValue();
-            timer = 0f; // Reset the timer after the delay
-        }
-        else
-        {
-            timer += Time.deltaTime; // Increment the timer
-            stage2timer += Time.deltaTime; // Increment the speed up timer
-        }        
-    }
-
-    void SelectNextTextObject()
-    {
         // Increment the currentIndex, and loop around if necessary
-        currentIndex = (currentIndex + 1) % textObjects.Length;
+        else
+            currentIndex = (currentIndex + dir + textObjects.Length) % textObjects.Length;
         // Update the selection state
         UpdateSelection();
     }
 
-    void SelectPreviousTextObject()
+    string SmallMenuSelection(int change = 0)
     {
-        // Decrement the currentIndex, and loop around if necessary
-        currentIndex = (currentIndex - 1 + textObjects.Length) % textObjects.Length;
-        // Update the selection state
-        UpdateSelection();
+        smallMenu[0] = (int)flow.speed;
+        smallMenu[1] = (int)flow.rotation;
+        if(smallMenuIndex == 2) //direction
+        {
+            smallMenu[2] = (smallMenu[2] + change + 3) % 3;
+            xrOrigin.transform.rotation = smallMenu[2] == 0 ? Quaternion.Euler(0, 0, 0) : smallMenu[2] == 1 ? Quaternion.Euler(90,0,0) : Quaternion.Euler(0,90,0);
+            return smallMenu[2] == 0 ? "Forward" : smallMenu[2] == 1 ? "Vertical" : "Horizontal";
+        }
+        if(smallMenuIndex == 3) //acceleration
+        {
+            smallMenu[3] = (smallMenu[3] + change + 3) % 3;
+            flow.acceleration = smallMenu[3] == 0 ? 0 : 3;
+            flow.angularAcceleration = smallMenu[3] == 2 ? 20 : 0;
+            return smallMenu[3] == 0 ? "None" : smallMenu[3] == 1 ? "Velocity" : "Rotation";
+        }
+        if (smallMenuIndex == 4 && change != 0) //grid density
+        {
+            smallMenu[4] = Mathf.Clamp(smallMenu[4] + change, 1, 3);
+            realtimeGrid.gap = 4 - smallMenu[4];
+            realtimeGrid.refresh = true;
+        }
+        else if (smallMenuIndex == 5 && change != 0)
+        {
+            smallMenu[5] = Mathf.Clamp(smallMenu[5] + change, 1, 10);
+            lineMaterial.SetFloat("_Cutoff", (11 - smallMenu[5]) * 0.1f);
+        }
+        else
+        {
+            smallMenu[smallMenuIndex] += change;
+            flow.speed = smallMenu[0];
+            flow.rotation = smallMenu[1];
+        }
+        return smallMenu[smallMenuIndex].ToString();
     }
 
     void UpdateSelection()
     {
+        if (!inMenu)
+        {
+            smallMenuTitle.text = smallMenuNames[smallMenuIndex];
+            smallMenuText.text = SmallMenuSelection();
+        }
         // Update the visual selection state of TextMeshPro objects
         for (int i = 0; i < textObjects.Length; i++)
         {
@@ -317,41 +350,27 @@ public class CustomRoomUI : MonoBehaviour
         }
     }
 
-    void IncreaseValue()
+    void IncreaseValue(int amount)
     {
+        if (!inMenu)
+        {
+            SmallMenuSelection(amount);
+            UpdateSelection();
+            return;
+        }
         if (currentIndex == 12 || currentIndex == 13 || currentIndex == 14)
         {
-            intValues[currentIndex]++; // Increment int values
+            intValues[currentIndex] += amount; // Increment int values
         }
 
         else if(currentIndex == 24)
         {
-            values[currentIndex] = Mathf.Clamp(values[currentIndex] + 0.1f, 0.0f, 1.0f); // Increment and clamp float values
+            values[currentIndex] = Mathf.Clamp(values[currentIndex] + amount * 0.1f, 0.0f, 1.0f); // Increment and clamp float values
         }
 
         else
         {
-            values[currentIndex] += 0.1f; // Increment float values by 0.1
-        }
-
-        UpdateDisplayedValue();
-    }
-
-    void DecreaseValue()
-    {
-        if (currentIndex == 12 || currentIndex == 13 || currentIndex == 14)
-        {
-            intValues[currentIndex]--; // Decrement int values
-        }
-
-        else if(currentIndex == 24)
-        {
-            values[currentIndex] = Mathf.Clamp(values[currentIndex] - 0.1f, 0.0f, 1.0f); // Decrement and clamp float values
-        }
-
-        else
-        {
-            values[currentIndex] -= 0.1f; // Decrement float values by 0.1
+            values[currentIndex] += amount * 0.1f; // Increment float values by 0.1
         }
 
         UpdateDisplayedValue();
@@ -421,6 +440,9 @@ public class CustomRoomUI : MonoBehaviour
         values[18] = 1;
         values[19] = 1;
         values[20] = 1;
+        values[21] = 0.5f;
+        values[22] = 0.5f;
+        values[23] = 0.5f;
 
         values[24] = 1;
 
@@ -443,16 +465,18 @@ public class CustomRoomUI : MonoBehaviour
 
     void StartScene()
     {
+        if (!inMenu)
+            return;
         flow.enabled = true;
 
         Platform.SetActive(false);
         ParameterUI.SetActive(false);
         //TimerClock.SetActive(true);
-        
 
         realtimeGrid.refresh = true;
 
         inMenu = false;
+        UpdateSelection();
     }
 
     void ExitScene()
