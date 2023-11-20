@@ -65,11 +65,13 @@ public class RoomSwitch : MonoBehaviour
 
     void Update()
     {
+        // REMEMEBER TO ADD TWOMINUTES CHECK BACK
+
         Scene currentScene = SceneManager.GetActiveScene();
 
         if(_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool primaryButtonRight) && primaryButtonRight)
         {
-            if(twoMinutes == true && currentScene.name != "TAPE_CUSTOM")
+            if(currentScene.name != "TAPE_CUSTOM")
             {
                 ExitRoom();
             }
@@ -77,7 +79,7 @@ public class RoomSwitch : MonoBehaviour
 
         // KEYBOARD CONTROLS
         // Spacebar = Exit room
-        if (Input.GetKeyDown(KeyCode.Space) && twoMinutes == true && currentScene.name != "TAPE_CUSTOM")
+        if (Input.GetKeyDown(KeyCode.Space) && currentScene.name != "TAPE_CUSTOM")
         {
             ExitRoom();
         }
@@ -134,7 +136,7 @@ public class RoomSwitch : MonoBehaviour
         StartCoroutine(FadeAndLoadScene(tapeNumber));
 
         // disable leaderboard mesh
-        Leaderboard.Instance.MeshDisabler();
+        StartCoroutine(LeaderboardFadeOut());
     }
 
     public void ExitRoom()
@@ -142,22 +144,13 @@ public class RoomSwitch : MonoBehaviour
         // Get the currently active scene
         Scene currentScene = SceneManager.GetActiveScene();
 
-        // Check if the name of the active scene is "MainScene"
-        if (currentScene.name == "MainScene")
-        {
-            // code for when MainScene is active
-            Debug.Log("The active scene is MainScene.");
-
-            // enable leaderboard mesh
-            Leaderboard.Instance.MeshEnabler();
-        }
-
-        else
+        // Check if the name of the active scene is not "MainScene"
+        if (currentScene.name != "MainScene")
         {
             StartCoroutine(FadeAndLoadScene("MainScene"));
 
             // enable leaderboard mesh
-            Leaderboard.Instance.MeshEnabler();
+            StartCoroutine(LeaderboardFadeIn());
 
             // Reset variable for next room
             twoMinutes = false;
@@ -199,5 +192,34 @@ public class RoomSwitch : MonoBehaviour
             fadeImage.color = new Color(0f, 0f, 0f, alpha);
             yield return null;
         }
+    }
+
+    IEnumerator LeaderboardFadeOut()
+    {
+        float alpha = 0f;
+        
+        // Fade out
+        while (alpha <= 1f)
+        {
+            alpha += Time.deltaTime * fadeSpeed;
+            yield return null;
+        }
+
+        // disable leaderboard mesh
+        Leaderboard.Instance.MeshDisabler();
+    }
+
+    IEnumerator LeaderboardFadeIn()
+    {
+        float alpha = 0f;
+
+        while (alpha >= 0f)
+        {
+            alpha -= Time.deltaTime * fadeSpeed;
+            yield return null;
+        }
+
+        // enable leaderboard mesh
+        Leaderboard.Instance.MeshEnabler();
     }
 }

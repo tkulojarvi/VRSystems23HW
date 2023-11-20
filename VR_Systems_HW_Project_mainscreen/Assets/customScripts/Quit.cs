@@ -47,10 +47,10 @@ public class Quit : MonoBehaviour
     void QuitGame()
     {
         // This will only work in a standalone build, not in the Unity Editor
-        /*
+        
         #if UNITY_STANDALONE
             Application.Quit();
         #endif
-        */
+        
     }
 }
