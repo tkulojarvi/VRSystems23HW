@@ -4,7 +4,7 @@ using UnityEngine;
 
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
-
+using UnityEngine.UI;
 using UnityEngine.XR;
 
 /*
@@ -32,9 +32,12 @@ public class RoomSwitch : MonoBehaviour
     public static RoomSwitch Instance;
     // XR Input
     private InputData _inputData;
-
     // Check if two minutes have passed - it is the minimum time the player is required to stay in the room
     public bool twoMinutes = false;
+
+    // Variables for fade effect
+    public Image fadeImage;
+    public float fadeSpeed = 1.5f;
 
     void Awake()
     {
@@ -53,6 +56,11 @@ public class RoomSwitch : MonoBehaviour
     {
         // Get a reference to the InputData script
         _inputData = GetComponent<InputData>();
+        fadeImage.color = new Color(0f, 0f, 0f, 255f);
+
+        StartCoroutine(StartingFade());
+
+        Debug.Log("start");
     }
 
     void Update()
@@ -61,7 +69,7 @@ public class RoomSwitch : MonoBehaviour
 
         if(_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool primaryButtonRight) && primaryButtonRight)
         {
-            if(currentScene.name != "TAPE_CUSTOM")
+            if(twoMinutes == true && currentScene.name != "TAPE_CUSTOM")
             {
                 ExitRoom();
             }
@@ -123,8 +131,7 @@ public class RoomSwitch : MonoBehaviour
     public void EnterRoom(string tapeNumber)
     {
         // tapeNumber is the name of the scene to load
-        SceneManager.LoadScene(tapeNumber);
-
+        StartCoroutine(FadeAndLoadScene(tapeNumber));
 
         // disable leaderboard mesh
         Leaderboard.Instance.MeshDisabler();
@@ -147,14 +154,50 @@ public class RoomSwitch : MonoBehaviour
 
         else
         {
-            // exit the room when the eject button is pressed
-            SceneManager.LoadScene("MainScene");
+            StartCoroutine(FadeAndLoadScene("MainScene"));
 
             // enable leaderboard mesh
             Leaderboard.Instance.MeshEnabler();
 
             // Reset variable for next room
             twoMinutes = false;
+        }
+    }
+
+    IEnumerator FadeAndLoadScene(string sceneName)
+    {
+        float alpha = 0f;
+
+        // Fade out
+        while (alpha <= 1f)
+        {
+            alpha += Time.deltaTime * fadeSpeed;
+            fadeImage.color = new Color(0f, 0f, 0f, alpha);
+            yield return null;
+        }
+
+        // Load the new scene
+        SceneManager.LoadScene(sceneName);
+
+        // Fade in
+        while (alpha >= 0f)
+        {
+            alpha -= Time.deltaTime * fadeSpeed;
+            fadeImage.color = new Color(0f, 0f, 0f, alpha);
+            yield return null;
+        }
+    }
+
+    IEnumerator StartingFade()
+    {
+        float alpha = 3f;
+
+        // Fade in
+        while (alpha >= 0f)
+        {
+            alpha -= Time.deltaTime * fadeSpeed;
+            fadeImage.color = new Color(0f, 0f, 0f, alpha);
+            yield return null;
         }
     }
 }
