@@ -26,7 +26,7 @@ public class StereoColor : MonoBehaviour
         rightTest.material.color = new Color(1,1,0.8f);
 
         GameObject right = Instantiate(transform.gameObject, null);
-        right.SetLayerRecursively(7);
+        right.SetLayerRecursively(rightTest.gameObject.layer);
         foreach(Renderer r in right.transform.GetComponentsInChildren<Renderer>())
         {
             r.sharedMaterial = rightMaterial;
