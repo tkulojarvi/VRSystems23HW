@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
+/*
+ * TapeControl
+ */
+
 public class TapeControl : MonoBehaviour
 {
     // Variables to store initial position, rotation, and rigidbody of the tape
@@ -13,8 +17,7 @@ public class TapeControl : MonoBehaviour
     Rigidbody tapeRigidbody;
 
     // Variables for tape properties and respawn handling
-    public float timerDuration = 10f;
-    private bool dropped = false;
+    public float timerDuration = 5f;
     private float rotationSpeed = 45f;
     private string tapeName;
 
@@ -22,6 +25,8 @@ public class TapeControl : MonoBehaviour
     public bool rotate = true;
     // Flag to indicate object is grabbed
     public bool grabbed = false;
+    private bool inOriginalPos = true;
+    private bool respawnCoroutineRunning = false;
 
     void Start()
     {
@@ -44,8 +49,7 @@ public class TapeControl : MonoBehaviour
     void Update()
     {
         // ANIMATION
-
-        // Check if the tape is grabbed and should be rotated
+        // Check if the tape should be rotated
         if (rotate == true)
         {
             // Custom is a special boy
@@ -55,22 +59,76 @@ public class TapeControl : MonoBehaviour
                 transform.Rotate(-Vector3.forward, rotationSpeed * Time.deltaTime);
             }
         }
+
+        // Check if tape is at original pos
+        TapeMovementDetector();
+        
+        // If not, it has either been grabbed by the player, it is on the table unused,
+        // or it has fallen out of reach.
+        if (inOriginalPos == false && respawnCoroutineRunning == false)
+        {
+            // If it is not grabbed, start a timer for respawning it.
+            if (grabbed == false)
+            {
+                // Disable animation
+                rotate = false;
+                // Enable gravity
+                tapeRigidbody.useGravity = true;
+                // Start timer
+                StartCoroutine(TimerForRespawn());
+            }
+        }
     }
 
-    void OnTriggerEnter(Collider other)
+    void TapeMovementDetector()
     {
-        // Check if the tape collided with the floor
-        if (other.CompareTag("Respawn Collider"))
+        // Check if the current position is different from the initial position
+
+        if (Vector3.Distance(transform.position, originalPosition) > 0.01f)
         {
-            // Set the dropped flag and respawn the tape
-            dropped = true;
+            //Debug.Log("Object has moved!");
+            inOriginalPos = false;
+        }
+
+        else if (Vector3.Distance(transform.position, originalPosition) <= 0.01f)
+        {
+            //Debug.Log("Object is at the start pos!");
+            inOriginalPos = true;
+        }
+    }
+
+    private IEnumerator TimerForRespawn()
+    {
+        respawnCoroutineRunning = true;
+        
+        // Initialize elapsed time
+        float elapsedTime = 0f;
+
+        while (elapsedTime < timerDuration)
+        {
+            // Update the elapsed time
+            elapsedTime += Time.deltaTime;
+            // Wait for the next frame
+            yield return null;
+        }
+
+        // If object has still not been grabbed, respawn it.
+        if(grabbed == false) 
+        {
+            respawnCoroutineRunning = false;
             RespawnTape();
+        }
+
+        else 
+        {
+            respawnCoroutineRunning = false;
         }
     }
 
     void RespawnTape()
     {
         // Handle respawning the tape to it's original position here.
+
         // Turn off rigidbody physics temporarily
         tapeRigidbody.isKinematic = true;
 
@@ -85,33 +143,6 @@ public class TapeControl : MonoBehaviour
 
         // Enable rotation animation
         rotate = true;
-
-        // Reset dropped flag
-        dropped = false;
-    }
-
-    private IEnumerator StartTimerCoroutine()
-    {
-
-        // If the player leaves the item on the table, it will despawn/respawn after some time.
-
-        // Initialize elapsed time
-        float elapsedTime = 0f;
-        
-        // Continue until the timer duration is reached, or the tape is grabbed again, or falls
-        while (elapsedTime < timerDuration && dropped == false && grabbed == false)
-        {
-            // Update the elapsed time
-            elapsedTime += Time.deltaTime;
-            // Wait for the next frame
-            yield return null;
-        }
-
-        // Respawn the tape if the timer duration is reached and it hasn't been grabbed
-        if(dropped == false && grabbed == false)
-        {
-            RespawnTape();
-        }
     }
 
     // Set the grabbed flag to true when the tape is grabbed
@@ -130,10 +161,9 @@ public class TapeControl : MonoBehaviour
     {
         if (args.interactorObject.transform.tag == "Left Hand" || args.interactorObject.transform.tag == "Right Hand")
         {
-            // Enable gravity and start the respawn timer
+            // Enable gravity
             grabbed = false;
             tapeRigidbody.useGravity = true;
-            StartTimerCoroutine();
         }
     }
 }
