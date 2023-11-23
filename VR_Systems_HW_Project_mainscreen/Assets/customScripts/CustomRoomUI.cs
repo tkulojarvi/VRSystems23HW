@@ -99,6 +99,12 @@ public class CustomRoomUI : MonoBehaviour
     string[] smallMenuNames = { "Speed", "Rotation", "Direction", "Acceleration", "Grid Density", "Object Shape" };
 
     private bool inMenu;
+    
+    // Variables for fixing the bug where the exit button fires twice
+    private bool buttonPressedThisFrame = false;
+    private float debounceCooldown = 0.5f; // Adjust the cooldown time as needed
+    private float cooldownTimer = 0f;
+
 
     // XR Input
     private InputData _inputData;
@@ -141,6 +147,12 @@ public class CustomRoomUI : MonoBehaviour
 
     void Update()
     {
+        if (cooldownTimer > 0f)
+        {
+            cooldownTimer -= Time.deltaTime;
+            return; // Exit the Update method prematurely
+        }
+
         smallMenuObject.SetActive(!inMenu);
         // XR Input
         // Left and Right
@@ -189,7 +201,7 @@ public class CustomRoomUI : MonoBehaviour
         }
 
         // KEYBOARD
-        // Keyboard probably doesn't work while controllers are active
+        // Keyboard might not work while controllers are active
         // Right
         if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
@@ -246,7 +258,12 @@ public class CustomRoomUI : MonoBehaviour
         }
         if(_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool primaryButtonRight) && primaryButtonRight)
         {
+            if (!buttonPressedThisFrame)
+            {
             ExitScene();
+            buttonPressedThisFrame = true;
+            cooldownTimer = debounceCooldown;
+            }
         }
 
         // Keyboard
@@ -261,6 +278,9 @@ public class CustomRoomUI : MonoBehaviour
             // If SPACE key pressed, EXIT SCENE WITH THE USER PARAMETERS.
             ExitScene();
         }
+
+        // Reset the flag when the button is not pressed
+        buttonPressedThisFrame = false;
     }
 
     void IncreaseKey(int amount)
@@ -471,7 +491,7 @@ public class CustomRoomUI : MonoBehaviour
 
         Platform.SetActive(false);
         ParameterUI.SetActive(false);
-        //TimerClock.SetActive(true);
+        TimerClock.SetActive(true);
 
         realtimeGrid.refresh = true;
 
@@ -486,7 +506,7 @@ public class CustomRoomUI : MonoBehaviour
         {
             Platform.SetActive(true);
             ParameterUI.SetActive(true);
-            //TimerClock.SetActive(false);
+            TimerClock.SetActive(false);
             
 
             inMenu = true;

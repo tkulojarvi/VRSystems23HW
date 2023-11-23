@@ -34,7 +34,7 @@ using UnityEngine;
 
 public class VHSTapeCollision : MonoBehaviour
 {
-    public float orientationThreshold = 5.0f; // Define a threshold for the acceptable orientation difference.
+    public float orientationThreshold = 10.0f; // Define a threshold for the acceptable orientation difference.
     private Vector3 targetPosition; // The final position where the tape should be placed.
     private Quaternion targetRotation; // The final rotation the tape should have.
     public float movementSpeed = 0.5f; // Adjust the movement speed as needed.
@@ -104,6 +104,9 @@ public class VHSTapeCollision : MonoBehaviour
 
     private void pullInTape()
     {
+        // set tape to center
+        SetTapePositionToVCR();
+        
         // Set tape start pos
         startPosition = transform.position;
 
@@ -121,6 +124,21 @@ public class VHSTapeCollision : MonoBehaviour
 
         // Start pulling the tape.
         isPullingTape = true;
+
+        // set texture
+        MonitorRender.Instance.ActivateScreen2();
+    }
+
+    private void SetTapePositionToVCR()
+    {
+        Vector3 tapePosition = tape.transform.position;
+        tapePosition.x = this.transform.position.x;
+        tapePosition.y = this.transform.position.y;
+        tape.transform.position = tapePosition;
+
+        Vector3 tapeRotation = tape.transform.rotation.eulerAngles;
+        tapeRotation = this.transform.rotation.eulerAngles;
+        tape.transform.rotation = Quaternion.Euler(tapeRotation);
     }
 
     private void checkNumber()

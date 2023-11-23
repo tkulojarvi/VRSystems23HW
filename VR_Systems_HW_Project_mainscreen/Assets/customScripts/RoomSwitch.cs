@@ -154,6 +154,9 @@ public class RoomSwitch : MonoBehaviour
 
             // Reset variable for next room
             twoMinutes = false;
+
+            // set texture
+            MonitorRender.Instance.ActivateScreen1();
         }
     }
 
@@ -161,9 +164,12 @@ public class RoomSwitch : MonoBehaviour
     {
         float alpha = 0f;
 
+        
+
         // Fade out
         while (alpha <= 1f)
         {
+            
             alpha += Time.deltaTime * fadeSpeed;
             fadeImage.color = new Color(0f, 0f, 0f, alpha);
             yield return null;
@@ -207,6 +213,8 @@ public class RoomSwitch : MonoBehaviour
 
         // disable leaderboard mesh
         Leaderboard.Instance.MeshDisabler();
+
+        MonitorRender.Instance.disableMesh();
     }
 
     IEnumerator LeaderboardFadeIn()
@@ -221,5 +229,7 @@ public class RoomSwitch : MonoBehaviour
 
         // enable leaderboard mesh
         Leaderboard.Instance.MeshEnabler();
+
+        MonitorRender.Instance.enableMesh();
     }
 }

@@ -41,12 +41,21 @@ public class Leaderboard : MonoBehaviour
     public static Leaderboard Instance; // Singleton instance
     string filePath;
 
-    public float[] timerValues = new float[9];
+    public float[] timerValues;
     int sceneIndex;
-    public TMP_Text leaderboardText;
+    public TMP_Text leaderboardText0;
+    public TMP_Text leaderboardText1;
+    public TMP_Text leaderboardText2;
+    public TMP_Text leaderboardText3;
+    string leaderboardString1;
+    string leaderboardString2;
+    string leaderboardString3;
 
     public GameObject screen;
-    public GameObject text;
+    public GameObject text0;
+    public GameObject text1;
+    public GameObject text2;
+    public GameObject text3;
     public GameObject edge;
     public GameObject edge2;
     MeshRenderer meshRenderer;
@@ -67,6 +76,9 @@ public class Leaderboard : MonoBehaviour
 
     void Start()
     {
+        int totalScenes = SceneManager.sceneCountInBuildSettings;
+        timerValues = new float[totalScenes];
+
         Load();
         UpdateLeaderboardText();
     }
@@ -87,24 +99,83 @@ public class Leaderboard : MonoBehaviour
     {
         sceneIndex = SceneManager.GetActiveScene().buildIndex;
 
-        // Save the timer value in the leaderboard array
-        timerValues[sceneIndex] = time;
-        
-        // Update the leaderboard text
-        UpdateLeaderboardText();
+        // Check if sceneIndex is within the bounds of the timerValues array
+        if (sceneIndex < timerValues.Length)
+        {
+            // Save the timer value in the leaderboard array
+            timerValues[sceneIndex] = time;
+
+            // Update the leaderboard text
+            UpdateLeaderboardText();
+        }
+
+        else
+        {
+            Debug.LogWarning("Scene index exceeds the size of the timerValues array.");
+        }
     }
 
     void UpdateLeaderboardText()
     {
-        string leaderboardString = "Leaderboard\n";
-
+        string leaderboardString0 = "Times\n";
+        string leaderboardString1 = "";  // Reset the strings
+        string leaderboardString2 = "";
+        string leaderboardString3 = "";
+        
         for (int i = 1; i < timerValues.Length; i++)
         {
             int sceneNumber = i;
-            leaderboardString += "Scene " + sceneNumber + ": " + FormatTime(timerValues[i]) + "\n";
+
+            if(sceneNumber == 1)
+            {
+                leaderboardString1 += "1 - Lateral: " + FormatTime(timerValues[i]) + "\n";
+            }
+
+            else if(sceneNumber == 2)
+            {
+                leaderboardString1 += "2 - Vertical: " + FormatTime(timerValues[i]) + "\n";
+            }
+
+            else if(sceneNumber == 3)
+            {
+                leaderboardString1 += "3 - Forward: " + FormatTime(timerValues[i]) + "\n";
+            }
+
+            else if(sceneNumber == 4)
+            {
+                leaderboardString2 += "4 - Yaw: " + FormatTime(timerValues[i]) + "\n";
+            }
+
+            else if(sceneNumber == 5)
+            {
+                leaderboardString2 += "5 - Pitch: " + FormatTime(timerValues[i]) + "\n";
+            }
+
+            else if(sceneNumber == 6)
+            {
+                leaderboardString2 += "6 - Roll: " + FormatTime(timerValues[i]) + "\n";
+            }
+
+            else if(sceneNumber == 7)
+            {
+                leaderboardString3 += "7 - Linear: " + FormatTime(timerValues[i]) + "\n";
+            }
+
+            else if(sceneNumber == 8)
+            {
+                leaderboardString3 += "8 - Angular: " + FormatTime(timerValues[i]) + "\n";
+            }
+
+            else if(sceneNumber == 9)
+            {
+                leaderboardString3 += "9 - Custom: " + FormatTime(timerValues[i]) + "\n";
+            }
         }
 
-        leaderboardText.text = leaderboardString;
+        leaderboardText0.text = leaderboardString0;
+        leaderboardText1.text = leaderboardString1;
+        leaderboardText2.text = leaderboardString2;
+        leaderboardText3.text = leaderboardString3;
     }
 
     string FormatTime(float timeInSeconds)
@@ -119,7 +190,16 @@ public class Leaderboard : MonoBehaviour
         meshRenderer = screen.GetComponent<MeshRenderer>();
         meshRenderer.enabled = false;
 
-        meshRenderer = text.GetComponent<MeshRenderer>();
+        meshRenderer = text0.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = false;
+
+        meshRenderer = text1.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = false;
+
+        meshRenderer = text2.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = false;
+
+        meshRenderer = text3.GetComponent<MeshRenderer>();
         meshRenderer.enabled = false;
 
         meshRenderer = edge.GetComponent<MeshRenderer>();
@@ -134,7 +214,16 @@ public class Leaderboard : MonoBehaviour
         meshRenderer = screen.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
 
-        meshRenderer = text.GetComponent<MeshRenderer>();
+        meshRenderer = text0.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = true;
+
+        meshRenderer = text1.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = true;
+
+        meshRenderer = text2.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = true;
+
+        meshRenderer = text3.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
 
         meshRenderer = edge.GetComponent<MeshRenderer>();
