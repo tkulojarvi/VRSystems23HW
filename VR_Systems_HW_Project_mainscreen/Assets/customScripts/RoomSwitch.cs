@@ -7,24 +7,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.XR;
 
-/*
- * RoomSwitch
- * 
- * Overview:
- * This script facilitates the switching between different rooms. It utilizes a Singleton pattern
- * to ensure there is only one instance of the RoomSwitch script, persists across scene changes, and handles inputs
- * for room switching. It also manages the visibility of UI elements using the Leaderboard script's MeshDisabler and MeshEnabler functions.
- * 
- * Components:
- * - twoMinutes: A boolean flag indicating whether two minutes have passed in the current room.
- * 
- * Functions:
- * - Awake(): Initializes the script as a Singleton, ensuring there is only one instance across scene changes.
- * - Update(): Checks for inputs to handle room switching.
- * - EnterRoom(string tapeNumber): Loads a new scene (room) based on the provided tapeNumber and disables the leaderboard mesh.
- * - ExitRoom(): Exits the current room and returns to the main scene, enabling the leaderboard mesh.
- * 
- */
 
 public class RoomSwitch : MonoBehaviour
 {
@@ -38,6 +20,8 @@ public class RoomSwitch : MonoBehaviour
     // Variables for fade effect
     public Image fadeImage;
     public float fadeSpeed = 1.5f;
+
+    private bool inLoadingScreen = false;
 
     void Awake()
     {
@@ -56,22 +40,24 @@ public class RoomSwitch : MonoBehaviour
     {
         // Get a reference to the InputData script
         _inputData = GetComponent<InputData>();
+
+        // Set the initial color of the fade image
         fadeImage.color = new Color(0f, 0f, 0f, 255f);
 
+        // Start the fade-in effect when the game starts
         StartCoroutine(StartingFade());
-
-        Debug.Log("start");
     }
 
     void Update()
     {
-        // REMEMEBER TO ADD TWOMINUTES CHECK BACK
-
+        // Get the currently active scene
         Scene currentScene = SceneManager.GetActiveScene();
 
+        // Check for XR input to exit the room
         if(_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool primaryButtonRight) && primaryButtonRight)
         {
-            if(currentScene.name != "TAPE_CUSTOM")
+            // add two minutes check here if required
+            if(currentScene.name != "TAPE_CUSTOM" && inLoadingScreen == false)
             {
                 ExitRoom();
             }
@@ -133,10 +119,7 @@ public class RoomSwitch : MonoBehaviour
     public void EnterRoom(string tapeNumber)
     {
         // tapeNumber is the name of the scene to load
-        StartCoroutine(FadeAndLoadScene(tapeNumber));
-
-        // disable leaderboard mesh
-        StartCoroutine(LeaderboardFadeOut());
+        StartCoroutine(FadeOut(tapeNumber));
     }
 
     public void ExitRoom()
@@ -147,43 +130,7 @@ public class RoomSwitch : MonoBehaviour
         // Check if the name of the active scene is not "MainScene"
         if (currentScene.name != "MainScene")
         {
-            StartCoroutine(FadeAndLoadScene("MainScene"));
-
-            // enable leaderboard mesh
-            StartCoroutine(LeaderboardFadeIn());
-
-            // Reset variable for next room
-            twoMinutes = false;
-
-            // set texture
-            MonitorRender.Instance.ActivateScreen1();
-        }
-    }
-
-    IEnumerator FadeAndLoadScene(string sceneName)
-    {
-        float alpha = 0f;
-
-        
-
-        // Fade out
-        while (alpha <= 1f)
-        {
-            
-            alpha += Time.deltaTime * fadeSpeed;
-            fadeImage.color = new Color(0f, 0f, 0f, alpha);
-            yield return null;
-        }
-
-        // Load the new scene
-        SceneManager.LoadScene(sceneName);
-
-        // Fade in
-        while (alpha >= 0f)
-        {
-            alpha -= Time.deltaTime * fadeSpeed;
-            fadeImage.color = new Color(0f, 0f, 0f, alpha);
-            yield return null;
+            StartCoroutine(FadeIn("MainScene"));
         }
     }
 
@@ -200,36 +147,83 @@ public class RoomSwitch : MonoBehaviour
         }
     }
 
-    IEnumerator LeaderboardFadeOut()
+    IEnumerator FadeOut(string sceneName)
     {
+        // Set the loading screen flag
+        inLoadingScreen = true;
+
         float alpha = 0f;
-        
+
         // Fade out
         while (alpha <= 1f)
         {
             alpha += Time.deltaTime * fadeSpeed;
+            fadeImage.color = new Color(0f, 0f, 0f, alpha);
             yield return null;
         }
 
-        // disable leaderboard mesh
+        // Load the new scene
+        SceneManager.LoadScene(sceneName);
+
+        // Disable leaderboard mesh and monitor render
         Leaderboard.Instance.MeshDisabler();
-
         MonitorRender.Instance.disableMesh();
-    }
 
-    IEnumerator LeaderboardFadeIn()
-    {
-        float alpha = 0f;
+        // Disable background audio
+        MusicManager.Instance.toggleBackgroundAudioOff();
 
+        // Fade in
         while (alpha >= 0f)
         {
             alpha -= Time.deltaTime * fadeSpeed;
+            fadeImage.color = new Color(0f, 0f, 0f, alpha);
             yield return null;
         }
 
-        // enable leaderboard mesh
-        Leaderboard.Instance.MeshEnabler();
+        // Reset the loading screen flag
+        inLoadingScreen = false;
+    }
 
+    IEnumerator FadeIn(string sceneName)
+    {
+        // Set the loading screen flag
+        inLoadingScreen = true;
+
+        float alpha = 0f;
+
+        // Fade out
+        while (alpha <= 1f)
+        {
+            alpha += Time.deltaTime * fadeSpeed;
+            fadeImage.color = new Color(0f, 0f, 0f, alpha);
+            yield return null;
+        }
+
+        // Load the new scene
+        SceneManager.LoadScene(sceneName);
+
+        // Enable leaderboard mesh and monitor render
+        Leaderboard.Instance.MeshEnabler();
         MonitorRender.Instance.enableMesh();
+
+        // Enable background audio
+        MusicManager.Instance.toggleBackgroundAudioOn();
+
+        // Reset the two minutes variable
+        twoMinutes = false;
+
+        // Set the texture on the monitor
+        MonitorRender.Instance.ActivateScreen1();
+
+        // Fade in
+        while (alpha >= 0f)
+        {
+            alpha -= Time.deltaTime * fadeSpeed;
+            fadeImage.color = new Color(0f, 0f, 0f, alpha);
+            yield return null;
+        }
+
+        // Reset the loading screen flag
+        inLoadingScreen = false;
     }
 }

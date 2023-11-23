@@ -132,7 +132,7 @@ Material:
     - _HShift: 0.25
     - _IsScreenSpace: 0
     - _Metallic: 0
-    - _Noisy: 0.05
+    - _Noisy: 0.1
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0

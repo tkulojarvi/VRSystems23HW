@@ -6,51 +6,28 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System.IO;
 
-/*
- * Leaderboard
- * 
- * Overview:
- * This script manages a leaderboard, recording and displaying the times
- * spent in various scenes. The script is designed as a Singleton to persist across scene changes,
- * and it subscribes to the RoomTimer script's TimerUpdate event to capture the time for each scene.
- * The leaderboard data is stored persistently using PlayerPrefs, and the script includes functions to enable/disable
- * certain mesh renderers for UI elements on the leaderboard screen.
- * 
- * Components:
- * - timerValues: Array storing the times for each scene.
- * - leaderboardText: TextMeshProUGUI component for displaying the leaderboard on the UI.
- * - screen, text, edge, edge2: GameObjects representing UI elements on the leaderboard screen.
- * - meshRenderer: MeshRenderer component used to enable/disable visibility of UI elements.
- * 
- * Functions:
- * - Awake(): Ensures there is only one instance of the Leaderboard script and persists it across scene changes.
- * - Start(): Initializes the script by loading leaderboard data and updating the UI.
- * - OnEnable(), OnDisable(): Subscribes and unsubscribes from the TimerUpdate event to handle completion times.
- * - HandleTimerUpdate(float time): Updates the time for the current scene in the leaderboard array.
- * - UpdateLeaderboardText(): Updates the UI text with the current leaderboard data.
- * - FormatTime(float timeInSeconds): Formats time from seconds to a readable string (MM:SS).
- * - MeshDisabler(), MeshEnabler(): Enable or disable certain mesh renderers to show/hide UI elements on the leaderboard screen.
- * - Save(): Saves the leaderboard data to a persistent file.
- * - Load(): Loads leaderboard data from a persistent file and updates the timerValues array.
- * - OnDestroy(): Saves leaderboard data when the script is destroyed or the application exits.
- * 
- */
-
 public class Leaderboard : MonoBehaviour
 {
-    public static Leaderboard Instance; // Singleton instance
-    string filePath;
+    // Singleton 
+    public static Leaderboard Instance;
+    //string filePath;
 
+    // Array to store timer values for each scene
     public float[] timerValues;
+
+    // Scene index and leaderboard text objects for each category
     int sceneIndex;
     public TMP_Text leaderboardText0;
     public TMP_Text leaderboardText1;
     public TMP_Text leaderboardText2;
     public TMP_Text leaderboardText3;
+
+    // Strings to store formatted leaderboard text
     string leaderboardString1;
     string leaderboardString2;
     string leaderboardString3;
 
+    // UI elements for leaderboard display
     public GameObject screen;
     public GameObject text0;
     public GameObject text1;
@@ -76,9 +53,11 @@ public class Leaderboard : MonoBehaviour
 
     void Start()
     {
+        // Initialize the array to store timer values
         int totalScenes = SceneManager.sceneCountInBuildSettings;
         timerValues = new float[totalScenes];
 
+        // Load leaderboard data and update the display
         Load();
         UpdateLeaderboardText();
     }
@@ -97,6 +76,7 @@ public class Leaderboard : MonoBehaviour
 
     void HandleTimerUpdate(float time)
     {
+        // Get the current scene index
         sceneIndex = SceneManager.GetActiveScene().buildIndex;
 
         // Check if sceneIndex is within the bounds of the timerValues array
@@ -117,11 +97,13 @@ public class Leaderboard : MonoBehaviour
 
     void UpdateLeaderboardText()
     {
+        // Reset the strings
         string leaderboardString0 = "Times\n";
-        string leaderboardString1 = "";  // Reset the strings
+        string leaderboardString1 = "";
         string leaderboardString2 = "";
         string leaderboardString3 = "";
         
+        // Iterate through the timerValues array to format the leaderboard text
         for (int i = 1; i < timerValues.Length; i++)
         {
             int sceneNumber = i;
@@ -172,6 +154,7 @@ public class Leaderboard : MonoBehaviour
             }
         }
 
+        // Update the UI text objects with the formatted strings
         leaderboardText0.text = leaderboardString0;
         leaderboardText1.text = leaderboardString1;
         leaderboardText2.text = leaderboardString2;
@@ -180,6 +163,7 @@ public class Leaderboard : MonoBehaviour
 
     string FormatTime(float timeInSeconds)
     {
+        // Format the time in minutes and seconds
         int minutes = Mathf.FloorToInt(timeInSeconds / 60);
         int seconds = Mathf.FloorToInt(timeInSeconds % 60);
         return string.Format("{0:00}:{1:00}", minutes, seconds);
@@ -187,6 +171,7 @@ public class Leaderboard : MonoBehaviour
 
     public void MeshDisabler()
     {
+        // Disable mesh renderers of UI elements
         meshRenderer = screen.GetComponent<MeshRenderer>();
         meshRenderer.enabled = false;
 
@@ -211,6 +196,7 @@ public class Leaderboard : MonoBehaviour
 
     public void MeshEnabler()
     {
+        // Enable mesh renderers of UI elements
         meshRenderer = screen.GetComponent<MeshRenderer>();
         meshRenderer.enabled = true;
 
@@ -233,7 +219,7 @@ public class Leaderboard : MonoBehaviour
         meshRenderer.enabled = true;
     }
 
-    void Save()
+    public void Save()
     {
         // Specify the file path where you want to save the leaderboard data
         string filePath = Application.persistentDataPath + "/leaderboard.txt";
@@ -285,10 +271,5 @@ public class Leaderboard : MonoBehaviour
         {
             Debug.LogWarning("Leaderboard file not found at: " + filePath);
         }
-    }
-
-    void OnDestroy()
-    {
-        Save();
     }
 }

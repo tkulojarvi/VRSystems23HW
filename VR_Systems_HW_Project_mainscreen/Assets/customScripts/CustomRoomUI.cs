@@ -7,55 +7,6 @@ using UnityEngine.InputSystem;
 
 using UnityEngine.XR;
 
-/*
- * CustomRoomUI
- * 
- * Overview:
- * This script is designed to control the custom room user interface.
- * The UI allows the user to modify various parameters that affect the environment.
- * The user can modify position, acceleration, and optic flow through individual parameters.
- * The script utilizes TextMeshPro objects to display and interact with the user for parameter adjustment.
- * It also interfaces with the InputSystem to capture keyboard inputs.
- * The script enables the user to navigate through different parameters, increase/decrease their values,
- * and start/exit the scene with the configured parameters.
- *
- * Components:
- * - xrOrigin: Reference to the GameObject representing the XR origin.
- * - flow: Reference to the Flow script attached to the xrOrigin, controlling position and acceleration.
- * - gridSpawner: Reference to the GameObject responsible for spawning a grid in the scene.
- * - lineMaterial: Material used to control the shape of the grid.
- * - realtimeGrid: Reference to the RealtimeGrid script controlling optic flow -related parameters.
- * - textObjects: Array of TextMeshProUGUI objects used to display and interact with parameter values.
- * - values: Array storing float values for each parameter.
- * - intValues: Array storing integer values for specific parameters.
- * - currentIndex: Index of the currently selected TextMeshPro object.
- * - increaseKeyDown, decreaseKeyDown: Flags indicating whether the increase or decrease key is currently held.
- * - timer, stage2timer: Timers used to control the speed of value adjustments.
- * - delay: Delay between value adjustments, with stage2delay.
- * - stage2delay: Time until indicating a faster adjustment.
- * - ParameterUI, Platform, TimerClock, LeftHand, RightHand: GameObjects representing UI elements in the scene.
- * - inMenu: Flag indicating whether the user is currently in the parameter adjustment menu.
- * 
- * Functions:
- * - Start(): Initializes references, sets up the initial display, and selection state.
- * - OnEnable(), OnDisable(): Enable and disable InputSystem controls for keyboard input.
- * - Update(): Handles keyboard input for navigation, value adjustments, and scene start/exit.
- * - IncreaseKey(), DecreaseKey(): Incrementally adjust parameter values while keys are held.
- * - SelectNextTextObject(), SelectPreviousTextObject(): Change the selected parameter for adjustment.
- * - UpdateSelection(): Updates the visual selection state of TextMeshPro objects.
- * - IncreaseValue(), DecreaseValue(): Adjust the selected parameter's value based on its type.
- * - UpdateDisplayedValue(): Updates the displayed value of the selected parameter.
- * - AssignValues(): Assigns the configured values to the corresponding components in the scene.
- * - InitializeValues(): Initializes default values for parameters and updates the UI display.
- * - StopMovementInMenu(): Stops the optic flow movement when in the parameter adjustment menu.
- * - StartScene(): Initiates the scene with the configured parameter values.
- * - ExitScene(): Exits either to the main menu or back to the parameter adjustment menu, based on the current state.
- *
- * 19/11/2023 NOTE! ADDED XR CONTROLS TO SCENE!
- *
- *
- */
-
 public class CustomRoomUI : MonoBehaviour
 {
     // Position, acceleration
@@ -69,6 +20,7 @@ public class CustomRoomUI : MonoBehaviour
     // An array to hold references to your TextMeshPro objects
     public TextMeshProUGUI[] textObjects;
 
+    // Small menu UI elements
     public GameObject smallMenuObject;
     public TextMeshProUGUI smallMenuTitle, smallMenuText;
     
@@ -78,6 +30,7 @@ public class CustomRoomUI : MonoBehaviour
     // Index of the currently selected TextMeshPro object
     private int currentIndex = 0;
 
+    // Variables for handling key states and timers
     private bool increaseKeyDown = false;
     private bool decreaseKeyDown = false;
     private float timer = 0f;
@@ -85,10 +38,12 @@ public class CustomRoomUI : MonoBehaviour
     private float delay = 0.1f;
     private float stage2delay = 1;
 
+    // UI game objects
     public GameObject ParameterUI;
     public GameObject Platform;
     public GameObject TimerClock;
 
+    // Index and arrays for small menu options
     int smallMenuIndex = 0;
     int[] smallMenu = { 3,  //speed
                         0,  //rotation
@@ -98,13 +53,13 @@ public class CustomRoomUI : MonoBehaviour
                         1 };//object shape
     string[] smallMenuNames = { "Speed", "Rotation", "Direction", "Acceleration", "Grid Density", "Object Shape" };
 
+    // Check for whether to exit to custom room menu or main menu
     private bool inMenu;
     
     // Variables for fixing the bug where the exit button fires twice
     private bool buttonPressedThisFrame = false;
     private float debounceCooldown = 0.5f; // Adjust the cooldown time as needed
     private float cooldownTimer = 0f;
-
 
     // XR Input
     private InputData _inputData;
@@ -115,12 +70,10 @@ public class CustomRoomUI : MonoBehaviour
         // Get a reference to the InputData script
         _inputData = GetComponent<InputData>();
 
-        // We are in the menu
         inMenu = true;
 
-        // Get a referemce to the flow script to change values
+        // Get a reference
         flow = xrOrigin.GetComponent<Flow>();
-        // Get a reference to the gridspawner script to change values
         realtimeGrid = gridSpawner.GetComponent<RealtimeGrid>();
 
         // Initialize the array to store values for each TextMeshPro object
@@ -147,15 +100,18 @@ public class CustomRoomUI : MonoBehaviour
 
     void Update()
     {
+        // Cooldown for button presses
         if (cooldownTimer > 0f)
         {
             cooldownTimer -= Time.deltaTime;
             return; // Exit the Update method prematurely
         }
 
+        // Show/hide small menu
         smallMenuObject.SetActive(!inMenu);
+
         // XR Input
-        // Left and Right
+        // XR Input for left controller
         if (_inputData._leftController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 leftAnalog))
         {
             float threshold = 0.5f; // Threshold for recognizing input
@@ -174,7 +130,7 @@ public class CustomRoomUI : MonoBehaviour
             }
         }
         
-        // Up and Down
+        // XR Input for right controller
         if (_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 rightAnalog))
         {
             float threshold = 0.5f;
@@ -201,7 +157,7 @@ public class CustomRoomUI : MonoBehaviour
         }
 
         // KEYBOARD
-        // Keyboard might not work while controllers are active
+        // Keyboard might not work while controllers are active!
         // Right
         if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
@@ -283,6 +239,7 @@ public class CustomRoomUI : MonoBehaviour
         buttonPressedThisFrame = false;
     }
 
+    // Method to handle continuous key presses for increasing values
     void IncreaseKey(int amount)
     {
         if(stage2timer >= stage2delay)
@@ -302,6 +259,7 @@ public class CustomRoomUI : MonoBehaviour
         }
     }
 
+    // Method to select the next or previous TextMeshPro object
     void SelectNextTextObject(int dir)
     {
         if (!inMenu)
@@ -315,6 +273,7 @@ public class CustomRoomUI : MonoBehaviour
         UpdateSelection();
     }
 
+    // Method to handle small menu selections
     string SmallMenuSelection(int change = 0)
     {
         smallMenu[0] = (int)flow.speed;
@@ -352,6 +311,7 @@ public class CustomRoomUI : MonoBehaviour
         return smallMenu[smallMenuIndex].ToString();
     }
 
+    // Method to update the visual selection state of TextMeshPro objects
     void UpdateSelection()
     {
         if (!inMenu)
@@ -370,6 +330,7 @@ public class CustomRoomUI : MonoBehaviour
         }
     }
 
+    // Method to handle continuous value increase
     void IncreaseValue(int amount)
     {
         if (!inMenu)
@@ -396,6 +357,7 @@ public class CustomRoomUI : MonoBehaviour
         UpdateDisplayedValue();
     }
 
+    // Method to update the displayed values of TextMeshPro objects
     void UpdateDisplayedValue()
     {
         if (currentIndex == 12 || currentIndex == 13 || currentIndex == 14)
@@ -441,6 +403,7 @@ public class CustomRoomUI : MonoBehaviour
         lineMaterial.SetFloat("_Cutoff", values[24]);
     }
 
+    // Initialize default values
     void InitializeValues()
     {
         intValues = new int[textObjects.Length];
@@ -472,6 +435,7 @@ public class CustomRoomUI : MonoBehaviour
         }
     }
 
+    // Method to stop optic flow 
     void StopMovementInMenu()
     {
         Quaternion newRotation = Quaternion.Euler(0, 0, 0);
@@ -483,6 +447,7 @@ public class CustomRoomUI : MonoBehaviour
         flow.enabled = false;
     }
 
+    // Method to start the scene and apply user-selected parameters
     void StartScene()
     {
         if (!inMenu)
@@ -499,6 +464,7 @@ public class CustomRoomUI : MonoBehaviour
         UpdateSelection();
     }
 
+    // Method to exit the scene or return to the menu based on the current state
     void ExitScene()
     {
         // EXIT TO MENU

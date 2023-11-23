@@ -2,44 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/*
- * VHSTapeCollision
- * 
- * Overview:
- * This script is attached to an invisible GameObject representing the VHS insertion hole in a Unity scene.
- * It manages the logic for correctly pulling a virtual tape into the VHS player once the player moves it into range.
- * The script detects the tape's collision, checks its orientation, disables physics, and smoothly moves it to the final position.
- * After reaching the final position, it retrieves the tape's name to determine the room number the player moves to.
- * The script interfaces with the RoomSwitch script to handle room transitions based on the inserted tape.
- * 
- * Components:
- * - orientationThreshold: The acceptable orientation difference between the tape and the insertion hole.
- * - targetPosition, targetRotation: The final position and rotation where the tape should be placed.
- * - movementSpeed: Adjusts the speed at which the tape is moved into the player.
- * - isPullingTape: Flag indicating if the tape is being pulled.
- * - correctOrientation: Flag indicating if the tape's orientation matches the insertion hole's orientation.
- * - tape: Reference to the GameObject representing the virtual tape.
- * - tapeRigidbody: Reference to the Rigidbody component of the virtual tape.
- * - tapeName: The name of the virtual tape, representing the room number.
- * - startPosition: The initial position of the virtual tape.
- * 
- * Functions:
- * - Update(): Checks if the tape is being pulled, smoothly moves it to the target position, and triggers actions upon completion.
- * - OnTriggerEnter(Collider other): Detects when the virtual tape collides with the VHS player and initiates the pulling process.
- * - checkOrientation(): Calculates the orientation difference between the tape and the insertion hole and checks if it's within the threshold.
- * - pullInTape(): Sets up the target position, disables physics on the tape, and starts pulling it into the player.
- * - checkNumber(): Retrieves the tape's name (room number) and calls the RoomSwitch script to handle the room transition.
- * 
- */
-
 public class VHSTapeCollision : MonoBehaviour
 {
     public float orientationThreshold = 10.0f; // Define a threshold for the acceptable orientation difference.
     private Vector3 targetPosition; // The final position where the tape should be placed.
-    private Quaternion targetRotation; // The final rotation the tape should have.
+    //private Quaternion targetRotation;
     public float movementSpeed = 0.5f; // Adjust the movement speed as needed.
     private bool isPullingTape = false; // Flag to indicate if the tape is being pulled.
-    bool correctOrientation = false;    // orientation check
+    bool correctOrientation = false; // Flag to indicate if tape orientation is correct.
+
     // TAPE
     private GameObject tape;    // tape object
     Rigidbody tapeRigidbody;    // THE RIGIDBODY of the tape object
@@ -127,15 +98,20 @@ public class VHSTapeCollision : MonoBehaviour
 
         // set texture
         MonitorRender.Instance.ActivateScreen2();
+        
+        // Play audio cue.
+        MusicManager.Instance.PlayAudioOnce();
     }
 
     private void SetTapePositionToVCR()
     {
+        // Set tape position to align with the VCR.
         Vector3 tapePosition = tape.transform.position;
         tapePosition.x = this.transform.position.x;
         tapePosition.y = this.transform.position.y;
         tape.transform.position = tapePosition;
 
+        // Set tape rotation to align with the VCR.
         Vector3 tapeRotation = tape.transform.rotation.eulerAngles;
         tapeRotation = this.transform.rotation.eulerAngles;
         tape.transform.rotation = Quaternion.Euler(tapeRotation);
@@ -143,6 +119,7 @@ public class VHSTapeCollision : MonoBehaviour
 
     private void checkNumber()
     {
+        // Inform the RoomSwitch script
         RoomSwitch.Instance.EnterRoom(tapeName);
     }
 }

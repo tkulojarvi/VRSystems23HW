@@ -5,10 +5,6 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
-/*
- * TapeControl
- */
-
 public class TapeControl : MonoBehaviour
 {
     // Variables to store initial position, rotation, and rigidbody of the tape
@@ -25,8 +21,12 @@ public class TapeControl : MonoBehaviour
     public bool rotate = true;
     // Flag to indicate object is grabbed
     public bool grabbed = false;
+    // Flag for if the object is in the original spawn
     private bool inOriginalPos = true;
     private bool respawnCoroutineRunning = false;
+
+    // Audio effect
+    private AudioSource audioSource;
 
     void Start()
     {
@@ -39,6 +39,8 @@ public class TapeControl : MonoBehaviour
 
         // Get the name of the tape
         tapeName = gameObject.name;
+
+        audioSource = GetComponent<AudioSource>();
 
         // Add event listeners for grab interactions
         XRGrabInteractable grabInteractable = GetComponent<XRGrabInteractable>();
@@ -150,6 +152,9 @@ public class TapeControl : MonoBehaviour
     {
         if (args.interactorObject.transform.tag == "Left Hand" || args.interactorObject.transform.tag == "Right Hand")
         {
+            // Play the audio once
+            PlayAudioOnce();
+
             // Disable animation
             rotate = false;
             grabbed = true;
@@ -164,6 +169,16 @@ public class TapeControl : MonoBehaviour
             // Enable gravity
             grabbed = false;
             tapeRigidbody.useGravity = true;
+        }
+    }
+
+    void PlayAudioOnce()
+    {
+        // Check if the audio source is not already playing
+        if (!audioSource.isPlaying)
+        {
+            // Play the audio
+            audioSource.Play();
         }
     }
 }

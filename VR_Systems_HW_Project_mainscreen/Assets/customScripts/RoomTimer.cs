@@ -6,29 +6,6 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 
-/*
- * RoomTimer
- * 
- * Overview:
- * This script manages the timer functionality for a room. It tracks the elapsed time
- * the player spends in a room, updates the timer text on the UI, and triggers an event when the timer updates.
- * Additionally, it checks whether two minutes have passed and sets a flag in the RoomSwitch script accordingly.
- * 
- * Components:
- * - timerText: TextMeshPro (TMP) text element to display the timer on the UI.
- * - currentTime: The current elapsed time in seconds.
- * - sceneIndex: The build index of the active scene.
- * 
- * Events:
- * - TimerUpdate: Delegate event to notify when the timer updates.
- * 
- * Functions:
- * - Start(): Initializes the script by getting the active scene's build index and the initial timer value.
- * - Update(): Updates the timer based on elapsed time, triggers the TimerUpdate event, and checks for the two-minute threshold.
- * - UpdateTimerText(): Updates the UI timer text with the current elapsed time.
- * 
- */
-
 public class RoomTimer : MonoBehaviour
 {
     public TMP_Text timerText;

@@ -26,6 +26,9 @@ public class Quit : MonoBehaviour
             
             if(currentScene.name == "MainScene")
             {
+                // Save the timer values to a file
+                Leaderboard.Instance.Save();
+
                 // Call the quit method to exit the game
                 QuitGame();
             }
@@ -37,6 +40,9 @@ public class Quit : MonoBehaviour
             
             if(currentScene.name == "MainScene")
             {
+                // Save the timer values to a file
+                Leaderboard.Instance.Save();
+
                 // Call the quit method to exit the game
                 QuitGame();
             }

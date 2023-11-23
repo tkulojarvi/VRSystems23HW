@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class MonitorRender : MonoBehaviour
 {
+
+    // Script for handling switching between two different textures on the monitor in front of the player.
+
     public GameObject screen1texture;
     public GameObject screen2texture;
     public GameObject objectDisable;
