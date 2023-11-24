@@ -49,6 +49,11 @@ public class Quit : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        Leaderboard.Instance.Save();
+    }
+
     // Function to quit the game
     void QuitGame()
     {
