@@ -65,8 +65,17 @@ public class CustomRoomUI : MonoBehaviour
     private InputData _inputData;
     float lastSelectionTime = 0f; // Initialize the last selection time
 
+    // Add a variable to control the blinking speed
+    public float blinkSpeed = 0.5f;
+
+    // Array to store references to each blinking coroutine
+    private Coroutine[] blinkCoroutines;
+
     void Start()
     {
+        // Initialize the array
+        blinkCoroutines = new Coroutine[textObjects.Length];
+
         // Get a reference to the InputData script
         _inputData = GetComponent<InputData>();
 
@@ -319,14 +328,49 @@ public class CustomRoomUI : MonoBehaviour
             smallMenuTitle.text = smallMenuNames[smallMenuIndex];
             smallMenuText.text = SmallMenuSelection();
         }
+
         // Update the visual selection state of TextMeshPro objects
         for (int i = 0; i < textObjects.Length; i++)
         {
             // Get the Renderer component of the background object
             Renderer backgroundRenderer = textObjects[i].transform.Find("Background").GetComponent<Renderer>();
 
-            // Set the material color based on whether the TextMeshPro object is selected or not
-            backgroundRenderer.material.color = (i == currentIndex) ? Color.grey : Color.white;
+            // Check if the TextMeshPro object is selected
+            if (i == currentIndex)
+            {
+                // If not already blinking, start the blinking coroutine
+                if (blinkCoroutines[i] == null)
+                {
+                    blinkCoroutines[i] = StartCoroutine(Blink(backgroundRenderer));
+                }
+            }
+            else
+            {
+                // If currently blinking, stop the blinking coroutine and set the color to white
+                if (blinkCoroutines[i] != null)
+                {
+                    StopCoroutine(blinkCoroutines[i]);
+                    blinkCoroutines[i] = null;
+                    backgroundRenderer.material.color = Color.white;
+                }
+            }
+        }
+    }
+
+    IEnumerator Blink(Renderer renderer)
+    {
+        // Infinite loop for blinking effect
+        while (true)
+        {
+            // Set the color to red
+            renderer.material.color = Color.red;
+            // Wait for a short duration
+            yield return new WaitForSeconds(blinkSpeed);
+
+            // Set the color to white
+            renderer.material.color = Color.white;
+            // Wait for the same duration
+            yield return new WaitForSeconds(blinkSpeed);
         }
     }
 

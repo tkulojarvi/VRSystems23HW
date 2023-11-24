@@ -19,7 +19,7 @@ public class RoomSwitch : MonoBehaviour
 
     // Variables for fade effect
     public Material fadeImage;
-    public float fadeSpeed = 1.5f;
+    public float fadeSpeed = 2f;
 
     private bool inLoadingScreen = false;
 

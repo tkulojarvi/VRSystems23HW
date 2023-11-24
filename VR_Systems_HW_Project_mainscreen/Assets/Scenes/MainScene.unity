@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1044716450}
-  m_IndirectSpecularColor: {r: 0.09299967, g: 0.04847119, b: 0.35661066, a: 1}
+  m_IndirectSpecularColor: {r: 0.09299967, g: 0.048473086, b: 0.35661262, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -9996,6 +9996,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: XR Origin (XR Rig)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3633156770359184448, guid: ee69b32b84147b84bab960b9b3c453e2,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6032486605665189888, guid: ee69b32b84147b84bab960b9b3c453e2,
         type: 3}
