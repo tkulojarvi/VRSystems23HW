@@ -1272,6 +1272,7 @@ GameObject:
   m_Component:
   - component: {fileID: 534300488}
   - component: {fileID: 534300489}
+  - component: {fileID: 534300490}
   m_Layer: 7
   m_Name: LeftEnvironment
   m_TagString: Untagged
@@ -1309,9 +1310,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f607207bfa95c4381d7ced3fcf490f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  colorSet1:
+  - {r: 1, g: 0.90615714, b: 0.71383643, a: 0}
+  - {r: 1, g: 0.96331614, b: 0.5251572, a: 0}
+  - {r: 0.8962264, g: 0.8354487, b: 0.5467544, a: 0}
+  - {r: 1, g: 0.9267792, b: 0.75157225, a: 0}
+  - {r: 1, g: 0.9604243, b: 0.32704395, a: 0}
+  colorSet2:
+  - {r: 1, g: 0.9058824, b: 0.7137255, a: 0}
+  - {r: 1, g: 0.96470594, b: 0.5254902, a: 0}
+  - {r: 0.8980393, g: 0.8352942, b: 0.54509807, a: 0}
+  - {r: 1, g: 0.92549026, b: 0.75294125, a: 0}
+  - {r: 1, g: 0.9607844, b: 0.3254902, a: 0}
   rightMaterial: {fileID: 2100000, guid: 97e0151fbf87ec243986455811e71b0d, type: 2}
   leftTest: {fileID: 2078794301}
   rightTest: {fileID: 1294577200}
+--- !u!114 &534300490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534300487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d62d4b7436e1d34e9f74b95966726e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &535001041
 GameObject:
   m_ObjectHideFlags: 0
@@ -3738,7 +3763,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 129
+    m_Bits: 385
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 8400000, guid: 5d9b9a8512183364ab3922b2fd5d8c6b, type: 2}
   m_TargetDisplay: 0

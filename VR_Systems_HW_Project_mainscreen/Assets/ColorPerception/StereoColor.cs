@@ -7,15 +7,26 @@ using UnityEngine.Networking;
 
 public class StereoColor : MonoBehaviour
 {
+    public Color[] colorSet1 = null;
+    public Color[] colorSet2 = null;
+    Color[] colorSet;
     public Material rightMaterial;
     public Renderer leftTest;
     public Renderer rightTest;
     static bool init = false;
     bool main = false;
 
+    InputData inputData;
+
     Light rightLight = null;
     Light leftLight = null;
+
     int state = 0;
+    int matchIndex = 0;
+    int playerIndex = 0;
+    int correctCount = 0;
+    Renderer match, playerSelection;
+    bool inputHold = false;
 
     void Start()
     {
@@ -23,6 +34,8 @@ public class StereoColor : MonoBehaviour
             return;
         init = true;
         main = true;
+
+        inputData = GetComponent<InputData>();
 
         GameObject right = Instantiate(transform.gameObject, null);
         right.SetLayerRecursively(rightTest.gameObject.layer);
@@ -42,27 +55,35 @@ public class StereoColor : MonoBehaviour
     private void Update()
     {
         if(!main) return;
-        if (Input.GetKeyDown(KeyCode.Space))
+
+        colorSet = state==0 ? colorSet1 : colorSet2;
+        match = state==0 ? leftTest : rightTest;
+        playerSelection = state==0 ? rightTest : leftTest;
+
+        if(inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool value) && value)
         {
-            if(state == 0)
+            if (!inputHold)
             {
-                state = 1;
-                rightLight.color = leftLight.color;
-                leftLight.color = Color.white;
-            }
-            else if (state == 1)
-            {
-                state = 2;
-                leftLight.color = Color.white;
-                rightLight.color = Color.white;
-            }
-            else if(state == 2)
-            {
-                state = 0;
-                leftLight.color = new Color(1, 1, 0.8f);
-                rightLight.color = Color.white;
+                playerIndex = (playerIndex + 1) % colorSet.Length;
+                playerSelection.sharedMaterial.color = colorSet[playerIndex];
+                inputHold = true;
             }
         }
+        else if (inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out bool value2) && value2)
+        {
+            if(!inputHold)
+            {
+                if(matchIndex < colorSet.Length && matchIndex == playerIndex)
+                {
+                    correctCount++;
+                }
+                matchIndex++;
+                match.sharedMaterial.color = matchIndex >= colorSet.Length ? Color.white : colorSet[matchIndex];
+                inputHold = true;
+            }
+        }
+        else
+            inputHold = false;
     }
 
     public void SetColorLeft(string color)
