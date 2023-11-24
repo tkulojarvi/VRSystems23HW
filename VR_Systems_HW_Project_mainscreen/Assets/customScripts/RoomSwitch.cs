@@ -18,7 +18,7 @@ public class RoomSwitch : MonoBehaviour
     public bool twoMinutes = false;
 
     // Variables for fade effect
-    public Image fadeImage;
+    public Material fadeImage;
     public float fadeSpeed = 1.5f;
 
     private bool inLoadingScreen = false;
@@ -143,7 +143,7 @@ public class RoomSwitch : MonoBehaviour
         {
             alpha -= Time.deltaTime * fadeSpeed;
             fadeImage.color = new Color(0f, 0f, 0f, alpha);
-            yield return null;
+            yield return new WaitForEndOfFrame();
         }
     }
 
@@ -159,7 +159,7 @@ public class RoomSwitch : MonoBehaviour
         {
             alpha += Time.deltaTime * fadeSpeed;
             fadeImage.color = new Color(0f, 0f, 0f, alpha);
-            yield return null;
+            yield return new WaitForEndOfFrame();
         }
 
         // Load the new scene
@@ -172,12 +172,14 @@ public class RoomSwitch : MonoBehaviour
         // Disable background audio
         MusicManager.Instance.toggleBackgroundAudioOff();
 
+        alpha = 2f;
+
         // Fade in
         while (alpha >= 0f)
         {
             alpha -= Time.deltaTime * fadeSpeed;
             fadeImage.color = new Color(0f, 0f, 0f, alpha);
-            yield return null;
+            yield return new WaitForEndOfFrame();
         }
 
         // Reset the loading screen flag
@@ -196,7 +198,7 @@ public class RoomSwitch : MonoBehaviour
         {
             alpha += Time.deltaTime * fadeSpeed;
             fadeImage.color = new Color(0f, 0f, 0f, alpha);
-            yield return null;
+            yield return new WaitForEndOfFrame();
         }
 
         // Load the new scene
@@ -215,12 +217,14 @@ public class RoomSwitch : MonoBehaviour
         // Set the texture on the monitor
         MonitorRender.Instance.ActivateScreen1();
 
+        alpha = 2f;
+
         // Fade in
         while (alpha >= 0f)
         {
             alpha -= Time.deltaTime * fadeSpeed;
             fadeImage.color = new Color(0f, 0f, 0f, alpha);
-            yield return null;
+            yield return new WaitForEndOfFrame();
         }
 
         // Reset the loading screen flag
