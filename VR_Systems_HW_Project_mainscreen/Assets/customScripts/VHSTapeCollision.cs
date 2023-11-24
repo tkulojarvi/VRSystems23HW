@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class VHSTapeCollision : MonoBehaviour
 {
@@ -52,6 +53,9 @@ public class VHSTapeCollision : MonoBehaviour
 
             if(correctOrientation == true) {
                 // if so, pull the tape in
+                XRGrabInteractable xri = other.GetComponent<XRGrabInteractable>();
+                xri.movementType = XRBaseInteractable.MovementType.Kinematic;
+                xri.trackPosition = false;
                 pullInTape();
             }
         }

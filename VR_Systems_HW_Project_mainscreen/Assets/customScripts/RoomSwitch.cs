@@ -128,7 +128,7 @@ public class RoomSwitch : MonoBehaviour
         Scene currentScene = SceneManager.GetActiveScene();
 
         // Check if the name of the active scene is not "MainScene"
-        if (currentScene.name != "MainScene")
+        if (currentScene.name != "MainScene" && !inLoadingScreen)
         {
             StartCoroutine(FadeIn("MainScene"));
         }

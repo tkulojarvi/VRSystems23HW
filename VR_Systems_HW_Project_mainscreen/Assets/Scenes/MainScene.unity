@@ -2610,7 +2610,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae992d2f7637db84593c8da00022d368, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  orientationThreshold: 5
+  orientationThreshold: 40
   movementSpeed: 1
 --- !u!65 &324686923
 BoxCollider:

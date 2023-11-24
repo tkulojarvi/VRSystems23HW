@@ -46,6 +46,8 @@ public class TapeControl : MonoBehaviour
         XRGrabInteractable grabInteractable = GetComponent<XRGrabInteractable>();
         grabInteractable.selectEntered.AddListener(SetGrabbedTrue);
         grabInteractable.selectExited.AddListener(SetGrabbedFalse);
+        grabInteractable.movementType = XRBaseInteractable.MovementType.VelocityTracking;
+        grabInteractable.trackPosition = true;
     }
 
     void Update()
