@@ -18,8 +18,8 @@ public class StereoColor : MonoBehaviour
 
     InputData inputData;
 
-    Light rightLight = null;
-    Light leftLight = null;
+    public Light rightLight = null;
+    public Light leftLight = null;
 
     int state = 0;
     int matchIndex = 0;
@@ -43,13 +43,6 @@ public class StereoColor : MonoBehaviour
         {
             r.sharedMaterial = rightMaterial;
         }
-        foreach(Light l in right.GetComponentsInChildren<Light>())
-        {
-            rightLight = l;
-            l.cullingMask *= 2;
-            l.color = Color.white;
-        }
-        leftLight = GetComponentInChildren<Light>();
     }
 
     private void Update()

@@ -5,36 +5,39 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MainScene.unity
     guid: 1f797d299ad8775409a7683f0b6ef69c
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_1.unity
     guid: 72be5a57ee1544b4f8696da020ec344d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_2.unity
     guid: 2746010a57d78eb4a9e96f947ffd64c3
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_3.unity
     guid: 01da96c0ba4003e4095b3e1b5dcd959d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_4.unity
     guid: f11656bc0015e3d4f97950febc2e245e
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_5.unity
     guid: ae49980c03370cd4191f531aab704309
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_6.unity
     guid: 8aae72f74403e744f9d2ae893086de43
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_7.unity
     guid: cb0399db7cc6bfc4bbb52ba5deb46075
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_8.unity
     guid: 19e5e2b882df1a3429a01ffaa7fcdf5a
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TAPE_CUSTOM.unity
     guid: d2ce02fafb9ab69489d190cb15f98247
+  - enabled: 1
+    path: Assets/Scenes/ColorPerception.unity
+    guid: 8d21fbd6cee7733408b1560e60044483
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 7a4862fbeb4d2664a872beaad39dcb01,
       type: 2}
