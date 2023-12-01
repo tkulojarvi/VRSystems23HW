@@ -30,7 +30,7 @@ public class StereoColor : MonoBehaviour
     int correctCount = 0;
     Renderer match, playerSelection;
 
-    float selectTemperature = 3000;
+    float selectTemperature = 10000;
 
     bool inputHold = false;
 
