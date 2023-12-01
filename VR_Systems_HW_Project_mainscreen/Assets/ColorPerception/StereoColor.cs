@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 
 public class StereoColor : MonoBehaviour
 {
+    public InputAction primary, secondary, adjust;
+
     public Color[] colorSet1 = null;
     public Color[] colorSet2 = null;
     Color[] colorSet;
@@ -26,6 +29,9 @@ public class StereoColor : MonoBehaviour
     int playerIndex = 0;
     int correctCount = 0;
     Renderer match, playerSelection;
+
+    float selectTemperature = 3000;
+
     bool inputHold = false;
 
     void Start()
@@ -37,23 +43,48 @@ public class StereoColor : MonoBehaviour
 
         inputData = GetComponent<InputData>();
 
+        primary.Enable();
+        secondary.Enable();
+        adjust.Enable();
+
         GameObject right = Instantiate(transform.gameObject, null);
         right.SetLayerRecursively(rightTest.gameObject.layer);
         foreach(Renderer r in right.transform.GetComponentsInChildren<Renderer>())
         {
             r.sharedMaterial = rightMaterial;
+            rightMaterial.SetFloat("_EditorTest", 0);
         }
     }
 
     private void Update()
     {
         if(!main) return;
+        Adjusting();
+    }
 
-        colorSet = state==0 ? colorSet1 : colorSet2;
-        match = state==0 ? leftTest : rightTest;
-        playerSelection = state==0 ? rightTest : leftTest;
+    void Adjusting()
+    {
+        match = state == 0 ? leftTest : rightTest;
+        playerSelection = state == 0 ? rightTest : leftTest;
 
-        if(inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool value) && value)
+        selectTemperature += adjust.ReadValue<Vector2>().x * Time.deltaTime * 3000;
+        playerSelection.sharedMaterial.color = colorSet2[playerIndex] * TemperatureToColor(selectTemperature);
+
+        if (primary.WasPressedThisFrame())
+        {
+            playerIndex = (playerIndex + 1) % colorSet1.Length;
+            matchIndex = (matchIndex + 1) % colorSet1.Length;
+            match.sharedMaterial.color = colorSet1[matchIndex];
+        }
+    }
+
+    void Matching()
+    {
+        colorSet = state == 0 ? colorSet1 : colorSet2;
+        match = state == 0 ? leftTest : rightTest;
+        playerSelection = state == 0 ? rightTest : leftTest;
+
+        if (inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out bool value) && value)
         {
             if (!inputHold)
             {
@@ -64,9 +95,9 @@ public class StereoColor : MonoBehaviour
         }
         else if (inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out bool value2) && value2)
         {
-            if(!inputHold)
+            if (!inputHold)
             {
-                if(matchIndex < colorSet.Length && matchIndex == playerIndex)
+                if (matchIndex < colorSet.Length && matchIndex == playerIndex)
                 {
                     correctCount++;
                 }
@@ -101,6 +132,24 @@ public class StereoColor : MonoBehaviour
     {
         if(color == null) return;
         rightLight.color = StringToColor(color);
+    }
+
+    Color TemperatureToColor(float temp)
+    {
+        Color color = Color.black;
+        temp /= 100;
+
+        if (temp <= 66) {
+            color.r = 1f;
+            color.g = Mathf.Clamp((99.4708025861f * Mathf.Log(temp) - 161.1195681661f)/255f, 0, 1.0f);
+            color.b = (138.5177312231f * Mathf.Log(temp - 10) - 305.0447927307f) / 255f;
+        }
+        else {
+            color.r = Mathf.Clamp(329.698727446f * Mathf.Pow(temp - 60, -0.1332047592f) / 255f, 0, 1.0f);
+            color.g = Mathf.Clamp(288.1221695283f * Mathf.Pow(temp - 60, -0.0755148492f) / 255f, 0, 1.0f);
+            color.b = 1f;
+        }
+        return color;
     }
 
     Color StringToColor(string color)
