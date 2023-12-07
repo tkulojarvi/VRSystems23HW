@@ -9,6 +9,10 @@ using UnityEngine.Networking;
 
 public class StereoColor : MonoBehaviour
 {
+    public static StereoColor Instance; // instance
+
+
+
     // Declare InputAction variables for primary, secondary, and adjust actions
     public InputAction primary, secondary, adjust;
 
@@ -26,14 +30,14 @@ public class StereoColor : MonoBehaviour
     static bool init = false;
     bool main = false;
 
-    // InputData class for handling input
+    // InputData class
     InputData inputData;
 
-    // Lights for left and right cameras
+    // Lights for left and right
     public Light rightLight = null;
     public Light leftLight = null;
 
-    // Variables of the color matching
+    // Variables
     int state = 0;
     int matchIndex = 0;
     int playerIndex = 0;
@@ -43,24 +47,28 @@ public class StereoColor : MonoBehaviour
     // temperature
     float selectTemperature = 10000;
 
-    // Flag to check if a button is being held
+    // Flag
     bool inputHold = false;
 
-
-    // NEW VARIABLES
+    // wall objects
     public GameObject backwallLL;
     public GameObject backwallLR;
     private GameObject backwallRL;
     private GameObject backwallRR;
 
-    
-    private string r;
-    private string g;
-    private string b;
-    private string rgbString;
-    private bool RGBInputSuccessful = false;
-    private bool WallInputSuccessful = false;
-    private string wallSelection;
+    void Awake()
+    {
+        // Ensure there is only one instance of the script
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
@@ -84,6 +92,8 @@ public class StereoColor : MonoBehaviour
         // Create a new GameObject for the right camera and set its layer
         GameObject right = Instantiate(transform.gameObject, null);
         right.SetLayerRecursively(rightTest.gameObject.layer);
+
+        // Change name
         right.name = "Right Environment";
 
         // Store references to the newly created right side back walls
@@ -104,31 +114,9 @@ public class StereoColor : MonoBehaviour
         if(!main) return;
 
         // Call the Adjusting method for color adjustment
-        //Adjusting();
-
-        // Check if the r key was pressed this frame
-        if (Keyboard.current.rKey.wasPressedThisFrame)
-        {
-            // Start the process to get RGB values from the user
-            StartCoroutine(GetRGBInput());
-        }
-
-        // Check if the w key was pressed this frame
-        else if(Keyboard.current.wKey.wasPressedThisFrame)
-        {
-            // Start the process to get input
-            StartCoroutine(GetWallInput());
-        }
-
-        // Use the obtained values
-        if(RGBInputSuccessful == true && WallInputSuccessful == true)
-        {
-            RGBInputSuccessful = false;
-            WallInputSuccessful = false;
-            SetWallColor(rgbString, wallSelection);
-        }
+        Adjusting();
     }
-/* 
+
     void Adjusting()
     {
         // If state is equal to 0, then assign the value of leftTest to match; otherwise, assign the value of rightTest to match
@@ -233,7 +221,7 @@ public class StereoColor : MonoBehaviour
         // Normalize the temperature
         temp /= 100;
 
-        // Check temperature range and set RGB components accordingly
+        // Check temperature range
         if (temp <= 66) {
             color.r = 1f;
             color.g = Mathf.Clamp((99.4708025861f * Mathf.Log(temp) - 161.1195681661f)/255f, 0, 1.0f);
@@ -246,7 +234,7 @@ public class StereoColor : MonoBehaviour
         }
         return color;
     }
-*/
+
     Color StringToColor(string color)
     {
         // Check if the color is represented in hexadecimal format
@@ -264,7 +252,7 @@ public class StereoColor : MonoBehaviour
         string[] rgb = color.Split(',');
         return new Color(int.Parse(rgb[0]) / 255f, int.Parse(rgb[1]) / 255f, int.Parse(rgb[2]) / 255f);
     }
-/*
+
     // Method to load an image asynchronously
     public void LoadImage(string name)
     {
@@ -298,18 +286,21 @@ public class StereoColor : MonoBehaviour
             }
         }
     }
-*/
 
-    // NEW FUNCTIONS BELOW
-
-    public void SetWallColor(string color, string selectedWall)
+    public Color RGBValuesToColor(float r, float g, float b)
     {
-        // Check if the input color is not null
-        if(color == null) return;
+        float redValue = r;   // red float value
+        float greenValue = g; // green float value
+        float blueValue = b;  // blue float value
 
-        // Debug logs to check input values
-        Debug.Log($"Setting color for {selectedWall} to {color}");
+        // Normalize
+        Color rgbColor = new Color(redValue / 255f, greenValue / 255f, blueValue / 255f);
 
+        return rgbColor;
+    }
+
+    public void SetWallColor(Color color, string selectedWall)
+    {
         // Get the Renderer components
         Material backwall_LL_Material = backwallLL.GetComponent<Renderer>().material;
         Material backwall_LR_Material = backwallLR.GetComponent<Renderer>().material;
@@ -319,135 +310,22 @@ public class StereoColor : MonoBehaviour
         // Set the color of the backwallLeft and backwallRight components
         if(selectedWall == "LL")
         {
-            Debug.Log("LL");
-            backwall_LL_Material.color = StringToColor(color);
+            backwall_LL_Material.color = color;
         }
 
         else if(selectedWall == "LR")
         {
-            Debug.Log("LR");
-            backwall_LR_Material.color = StringToColor(color);
+            backwall_LR_Material.color = color;
         }
 
         else if(selectedWall == "RL")
         {
-            Debug.Log("RL");
-            backwall_RL_Material.color = StringToColor(color);
+            backwall_RL_Material.color = color;
         }
 
         else if(selectedWall == "RR")
         {
-            Debug.Log("RR");
-            backwall_RR_Material.color = StringToColor(color);
+            backwall_RR_Material.color = color;
         }
-    }
-
-    private System.Collections.IEnumerator GetRGBInput()
-    {
-        // Prompt the user to input three different 3-digit numbers representing RGB values
-        Debug.Log("Please enter three 3-digit numbers representing RGB values.");
-
-        // Get input for R, G, and B values as strings
-        r = "";
-        g = "";
-        b = "";
-
-        yield return new WaitForSeconds(0.5f); // Delay to ensure the space key is not considered for input
-
-        while (true)
-        {
-            // Check for numerical key presses (0-9) using Unity's Input System
-            if (Keyboard.current.digit0Key.wasPressedThisFrame) r += "0";
-            if (Keyboard.current.digit1Key.wasPressedThisFrame) r += "1";
-            if (Keyboard.current.digit2Key.wasPressedThisFrame) r += "2";
-            if (Keyboard.current.digit3Key.wasPressedThisFrame) r += "3";
-            if (Keyboard.current.digit4Key.wasPressedThisFrame) r += "4";
-            if (Keyboard.current.digit5Key.wasPressedThisFrame) r += "5";
-            if (Keyboard.current.digit6Key.wasPressedThisFrame) r += "6";
-            if (Keyboard.current.digit7Key.wasPressedThisFrame) r += "7";
-            if (Keyboard.current.digit8Key.wasPressedThisFrame) r += "8";
-            if (Keyboard.current.digit9Key.wasPressedThisFrame) r += "9";
-
-            // Check for enter key press to break out of the loop
-            if (Keyboard.current.enterKey.wasPressedThisFrame) break;
-
-            yield return null; // Wait for the next frame
-        }
-
-        yield return new WaitForSeconds(0.5f); // Delay to ensure the space key is not considered for input
-
-        while (true)
-        {
-            // Check for numerical key presses (0-9) using Unity's Input System
-            if (Keyboard.current.digit0Key.wasPressedThisFrame) g += "0";
-            if (Keyboard.current.digit1Key.wasPressedThisFrame) g += "1";
-            if (Keyboard.current.digit2Key.wasPressedThisFrame) g += "2";
-            if (Keyboard.current.digit3Key.wasPressedThisFrame) g += "3";
-            if (Keyboard.current.digit4Key.wasPressedThisFrame) g += "4";
-            if (Keyboard.current.digit5Key.wasPressedThisFrame) g += "5";
-            if (Keyboard.current.digit6Key.wasPressedThisFrame) g += "6";
-            if (Keyboard.current.digit7Key.wasPressedThisFrame) g += "7";
-            if (Keyboard.current.digit8Key.wasPressedThisFrame) g += "8";
-            if (Keyboard.current.digit9Key.wasPressedThisFrame) g += "9";
-
-            // Check for enter key press to break out of the loop
-            if (Keyboard.current.enterKey.wasPressedThisFrame) break;
-
-            yield return null; // Wait for the next frame
-        }
-
-        yield return new WaitForSeconds(0.5f); // Delay to ensure the space key is not considered for input
-
-        while (true)
-        {
-            // Check for numerical key presses (0-9) using Unity's Input System
-            if (Keyboard.current.digit0Key.wasPressedThisFrame) b += "0";
-            if (Keyboard.current.digit1Key.wasPressedThisFrame) b += "1";
-            if (Keyboard.current.digit2Key.wasPressedThisFrame) b += "2";
-            if (Keyboard.current.digit3Key.wasPressedThisFrame) b += "3";
-            if (Keyboard.current.digit4Key.wasPressedThisFrame) b += "4";
-            if (Keyboard.current.digit5Key.wasPressedThisFrame) b += "5";
-            if (Keyboard.current.digit6Key.wasPressedThisFrame) b += "6";
-            if (Keyboard.current.digit7Key.wasPressedThisFrame) b += "7";
-            if (Keyboard.current.digit8Key.wasPressedThisFrame) b += "8";
-            if (Keyboard.current.digit9Key.wasPressedThisFrame) b += "9";
-
-            // Check for enter key press to break out of the loop
-            if (Keyboard.current.enterKey.wasPressedThisFrame) break;
-
-            yield return null; // Wait for the next frame
-        }
-
-        // Use the obtained RGB values
-        rgbString = $"{r},{g},{b}";
-        Debug.Log($"RGB values entered: {rgbString}");
-
-        RGBInputSuccessful = true;
-        
-        yield return null;
-    }
-
-    private System.Collections.IEnumerator GetWallInput()
-    {
-        wallSelection = "";
-
-        yield return new WaitForSeconds(0.5f); // Delay to ensure the space key is not considered for input
-
-        while (true)
-        {
-            // Check for key presses using Unity's Input System
-            if (Keyboard.current.lKey.wasPressedThisFrame) wallSelection += "L";
-            if (Keyboard.current.rKey.wasPressedThisFrame) wallSelection += "R";
-
-            // Check for enter key press to break out of the loop
-            if (Keyboard.current.enterKey.wasPressedThisFrame) break;
-
-            yield return null; // Wait for the next frame
-        }
-
-        // Set flag
-        WallInputSuccessful = true;
-
-        yield return null;
     }
 }
