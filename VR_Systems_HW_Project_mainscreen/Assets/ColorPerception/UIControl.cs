@@ -105,7 +105,20 @@ public class UIControl : MonoBehaviour
     private string colorState;
 
     public GameObject keyboard_ALL;
+
+    public GameObject leftEnvironment;
+    private StereoColor stereoColor;
+    public GameObject squareController;
+    private SquareControl squareControl;
+
+    public GameObject playerPosition;
+    public GameObject XROrigin;
+
+    public TextMeshProUGUI textMeshLLR;
+    public TextMeshProUGUI textMeshLLG;
+    public TextMeshProUGUI textMeshLLB;
     
+
     void Start()
     {
         // Get the button/slider components
@@ -176,12 +189,22 @@ public class UIControl : MonoBehaviour
         // Set initial color state
         colorState = "RGB";
 
-        // Set default colors
-        StereoColor.Instance.SetWallColor(StereoColor.Instance.RGBValuesToColor(100f, 100f, 100f), LLWall);
-        StereoColor.Instance.SetWallColor(StereoColor.Instance.RGBValuesToColor(100f, 100f, 100f), LRWall);
-        StereoColor.Instance.SetWallColor(StereoColor.Instance.RGBValuesToColor(100f, 100f, 100f), RLWall);
-        StereoColor.Instance.SetWallColor(StereoColor.Instance.RGBValuesToColor(100f, 100f, 100f), RRWall);
+        // Set reference to StereoColor
+        stereoColor = leftEnvironment.GetComponent<StereoColor>();
+        SetInitialColors();
+
+        // Set reference to SquareControl
+        squareControl = squareController.GetComponent<SquareControl>();
     }
+
+void SetInitialColors()
+{
+    // Set default colors
+    stereoColor.SetWallColor(stereoColor.RGBValuesToColor(200f, 100f, 100f), LLWall);
+    stereoColor.SetWallColor(stereoColor.RGBValuesToColor(100f, 100f, 100f), LRWall);
+    stereoColor.SetWallColor(stereoColor.RGBValuesToColor(100f, 100f, 100f), RLWall);
+    stereoColor.SetWallColor(stereoColor.RGBValuesToColor(100f, 100f, 100f), RRWall);
+}
 
 /*
 --------------------------
@@ -202,37 +225,37 @@ UP DOWN LEFT RIGHT ARROWS
             */
             case "Main/ColorRGB":
                 // CHANGE TO START
-                textMeshSelect.text = "Main/Start";
+                textMeshSelect.text = "Start";
                 selectionState = "Main/Start";
                 break;
 
             case "Main/ColorHSV":
                 // CHANGE TO RGB
-                textMeshSelect.text = "Main/ColorRGB";
+                textMeshSelect.text = "ColorRGB";
                 selectionState = "Main/ColorRGB";
                 break;
 
             case "Main/EyeAdapt":
                 // CHANGE TO HSV
-                textMeshSelect.text = "Main/ColorHSV";
+                textMeshSelect.text = "ColorHSV";
                 selectionState = "Main/ColorHSV";
                 break;
 
             case "Main/SquareControl":
                 // CHANGE TO EYEADAPT
-                textMeshSelect.text = "Main/EyeAdapt";
+                textMeshSelect.text = "EyeAdapt";
                 selectionState = "Main/EyeAdapt";
                 break;
             
             case "Main/KeyboardInput":
                 // CHANGE TO SQUARE
-                textMeshSelect.text = "Main/SquareControl";
+                textMeshSelect.text = "SquareControl";
                 selectionState = "Main/SquareControl";
                 break;
 
             case "Main/Start":
                 // CHANGE TO KEYBOARD
-                textMeshSelect.text = "Main/KeyboardInput";
+                textMeshSelect.text = "KeyboardInput";
                 selectionState = "Main/KeyboardInput";
                 break;
             /*
@@ -324,37 +347,37 @@ UP DOWN LEFT RIGHT ARROWS
             */
             case "Main/ColorRGB":
                 // CHANGE TO HSV
-                textMeshSelect.text = "Main/ColorHSV";
+                textMeshSelect.text = "ColorHSV";
                 selectionState = "Main/ColorHSV";
                 break;
 
             case "Main/ColorHSV":
                 // CHANGE TO EYEADAPT
-                textMeshSelect.text = "Main/EyeAdapt";
+                textMeshSelect.text = "EyeAdapt";
                 selectionState = "Main/EyeAdapt";
                 break;
 
             case "Main/EyeAdapt":
                 // CHANGE TO SQUARE
-                textMeshSelect.text = "Main/SquareControl";
+                textMeshSelect.text = "SquareControl";
                 selectionState = "Main/SquareControl";
                 break;
 
             case "Main/SquareControl":
                 // CHANGE TO KEYBOARD
-                textMeshSelect.text = "Main/KeyboardInput";
+                textMeshSelect.text = "KeyboardInput";
                 selectionState = "Main/KeyboardInput";
                 break;
             
             case "Main/KeyboardInput":
                 // CHANGE TO START
-                textMeshSelect.text = "Main/Start";
+                textMeshSelect.text = "Start";
                 selectionState = "Main/Start";
                 break;
 
             case "Main/Start":
                 // CHANGE TO RGB
-                textMeshSelect.text = "Main/ColorRGB";
+                textMeshSelect.text = "ColorRGB";
                 selectionState = "Main/ColorRGB";
                 break;
             
@@ -486,9 +509,9 @@ SELECTION AND EXIT CONTROL
             case "Main/SquareControl":
                 // DISABLE SELECT
                 selectUI.SetActive(false);
-                // ENABLE ARROWS
-                arrowUp.SetActive(true);
-                arrowDown.SetActive(true);
+                // ENABLE 
+                squareControl.squareControlEnabled = true;
+                textMeshSelect.text = "Use thumbsticks to move and resize";
                 // CHANGE SELECTION STATE
                 selectionState = "SquareControl/SquareControl";
                 break;
@@ -506,9 +529,7 @@ SELECTION AND EXIT CONTROL
                 // DISABLE SELECT
                 selectUI.SetActive(false);
                 // ENTER ROOM
-                
-                // Move player here
-
+                XROrigin.transform.position = playerPosition.transform.position;
                 // CHANGE SELECTION STATE
                 selectionState = "InGame";
                 break;
@@ -574,8 +595,8 @@ SELECTION AND EXIT CONTROL
             case "SquareControl/SquareControl":
                 // CHANGE TO MAIN/SQUARE
                 selectUI.SetActive(true);
-                arrowUp.SetActive(false);
-                arrowDown.SetActive(false);
+                squareControl.squareControlEnabled = false;
+                textMeshSelect.text = "SquareControl";
                 selectionState = "Main/SquareControl";
                 break;
 
@@ -603,33 +624,36 @@ RGB WALL VALUE SLIDERS
     {
         // Update color value
         LL_RedValue = value;
+        textMeshLLR.text = value.ToString();
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(LL_RedValue, LL_GreenValue, LL_BlueValue);
-        StereoColor.Instance.SetWallColor(color, LLWall);
+        color = stereoColor.RGBValuesToColor(LL_RedValue, LL_GreenValue, LL_BlueValue);
+        stereoColor.SetWallColor(color, LLWall);
     }
 
     void OnLL_GreenValueChanged(float value)
     {
         // Update color value
         LL_GreenValue = value;
+        textMeshLLG.text = value.ToString();
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(LL_RedValue, LL_GreenValue, LL_BlueValue);
-        StereoColor.Instance.SetWallColor(color, LLWall);
+        color = stereoColor.RGBValuesToColor(LL_RedValue, LL_GreenValue, LL_BlueValue);
+        stereoColor.SetWallColor(color, LLWall);
     }
 
     void OnLL_BlueValueChanged(float value)
     {
         // Update color value
         LL_BlueValue = value;
+        textMeshLLB.text = value.ToString();
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(LL_RedValue, LL_GreenValue, LL_BlueValue);
-        StereoColor.Instance.SetWallColor(color, LLWall);
+        color = stereoColor.RGBValuesToColor(LL_RedValue, LL_GreenValue, LL_BlueValue);
+        stereoColor.SetWallColor(color, LLWall);
     }
 
     void OnLR_RedValueChanged(float value)
@@ -639,8 +663,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(LR_RedValue, LR_GreenValue, LR_BlueValue);
-        StereoColor.Instance.SetWallColor(color, LRWall);
+        color = stereoColor.RGBValuesToColor(LR_RedValue, LR_GreenValue, LR_BlueValue);
+        stereoColor.SetWallColor(color, LRWall);
     }
 
     void OnLR_GreenValueChanged(float value)
@@ -650,8 +674,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(LR_RedValue, LR_GreenValue, LR_BlueValue);
-        StereoColor.Instance.SetWallColor(color, LRWall);
+        color = stereoColor.RGBValuesToColor(LR_RedValue, LR_GreenValue, LR_BlueValue);
+        stereoColor.SetWallColor(color, LRWall);
     }
 
     void OnLR_BlueValueChanged(float value)
@@ -661,8 +685,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(LR_RedValue, LR_GreenValue, LR_BlueValue);
-        StereoColor.Instance.SetWallColor(color, LRWall);
+        color = stereoColor.RGBValuesToColor(LR_RedValue, LR_GreenValue, LR_BlueValue);
+        stereoColor.SetWallColor(color, LRWall);
     }
 
     void OnRL_RedValueChanged(float value)
@@ -672,8 +696,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(RL_RedValue, RL_GreenValue, RL_BlueValue);
-        StereoColor.Instance.SetWallColor(color, RLWall);
+        color = stereoColor.RGBValuesToColor(RL_RedValue, RL_GreenValue, RL_BlueValue);
+        stereoColor.SetWallColor(color, RLWall);
     }
 
     void OnRL_GreenValueChanged(float value)
@@ -683,8 +707,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(RL_RedValue, RL_GreenValue, RL_BlueValue);
-        StereoColor.Instance.SetWallColor(color, RLWall);
+        color = stereoColor.RGBValuesToColor(RL_RedValue, RL_GreenValue, RL_BlueValue);
+        stereoColor.SetWallColor(color, RLWall);
     }
 
     void OnRL_BlueValueChanged(float value)
@@ -694,8 +718,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(RL_RedValue, RL_GreenValue, RL_BlueValue);
-        StereoColor.Instance.SetWallColor(color, RLWall);
+        color = stereoColor.RGBValuesToColor(RL_RedValue, RL_GreenValue, RL_BlueValue);
+        stereoColor.SetWallColor(color, RLWall);
     }
 
     void OnRR_RedValueChanged(float value)
@@ -705,8 +729,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(RR_RedValue, RR_GreenValue, RR_BlueValue);
-        StereoColor.Instance.SetWallColor(color, RRWall);
+        color = stereoColor.RGBValuesToColor(RR_RedValue, RR_GreenValue, RR_BlueValue);
+        stereoColor.SetWallColor(color, RRWall);
     }
 
     void OnRR_GreenValueChanged(float value)
@@ -716,8 +740,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(RR_RedValue, RR_GreenValue, RR_BlueValue);
-        StereoColor.Instance.SetWallColor(color, RRWall);
+        color = stereoColor.RGBValuesToColor(RR_RedValue, RR_GreenValue, RR_BlueValue);
+        stereoColor.SetWallColor(color, RRWall);
     }
 
     void OnRR_BlueValueChanged(float value)
@@ -727,8 +751,8 @@ RGB WALL VALUE SLIDERS
 
         // UPDATE WALL COLOR
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(RR_RedValue, RR_GreenValue, RR_BlueValue);
-        StereoColor.Instance.SetWallColor(color, RRWall);
+        color = stereoColor.RGBValuesToColor(RR_RedValue, RR_GreenValue, RR_BlueValue);
+        stereoColor.SetWallColor(color, RRWall);
     }
 
 /*
@@ -743,7 +767,7 @@ EYE VALUE SLIDERS
         Left_Eye_Red_Value = value;
 
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(Left_Eye_Red_Value, Left_Eye_Green_Value, Left_Eye_Blue_Value);
+        color = stereoColor.RGBValuesToColor(Left_Eye_Red_Value, Left_Eye_Green_Value, Left_Eye_Blue_Value);
         ColorFade.Instance.EyeAdaptToColor(color);
     }
 
@@ -753,7 +777,7 @@ EYE VALUE SLIDERS
         Left_Eye_Green_Value = value;
 
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(Left_Eye_Red_Value, Left_Eye_Green_Value, Left_Eye_Blue_Value);
+        color = stereoColor.RGBValuesToColor(Left_Eye_Red_Value, Left_Eye_Green_Value, Left_Eye_Blue_Value);
         ColorFade.Instance.EyeAdaptToColor(color);
     }
 
@@ -763,7 +787,7 @@ EYE VALUE SLIDERS
         Left_Eye_Blue_Value = value;
 
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(Left_Eye_Red_Value, Left_Eye_Green_Value, Left_Eye_Blue_Value);
+        color = stereoColor.RGBValuesToColor(Left_Eye_Red_Value, Left_Eye_Green_Value, Left_Eye_Blue_Value);
         ColorFade.Instance.EyeAdaptToColor(color);
     }
 
@@ -773,7 +797,7 @@ EYE VALUE SLIDERS
         Right_Eye_Red_Value = value;
         
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(Right_Eye_Red_Value, Right_Eye_Green_Value, Right_Eye_Blue_Value);
+        color = stereoColor.RGBValuesToColor(Right_Eye_Red_Value, Right_Eye_Green_Value, Right_Eye_Blue_Value);
         ColorFade.Instance.EyeAdaptToColor(color);
     }
 
@@ -783,7 +807,7 @@ EYE VALUE SLIDERS
         Right_Eye_Green_Value = value;
 
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(Right_Eye_Red_Value, Right_Eye_Green_Value, Right_Eye_Blue_Value);
+        color = stereoColor.RGBValuesToColor(Right_Eye_Red_Value, Right_Eye_Green_Value, Right_Eye_Blue_Value);
         ColorFade.Instance.EyeAdaptToColor(color);
     }
 
@@ -793,7 +817,7 @@ EYE VALUE SLIDERS
         Right_Eye_Blue_Value = value;
 
         Color color;
-        color = StereoColor.Instance.RGBValuesToColor(Right_Eye_Red_Value, Right_Eye_Green_Value, Right_Eye_Blue_Value);
+        color = stereoColor.RGBValuesToColor(Right_Eye_Red_Value, Right_Eye_Green_Value, Right_Eye_Blue_Value);
         ColorFade.Instance.EyeAdaptToColor(color);
     }
 

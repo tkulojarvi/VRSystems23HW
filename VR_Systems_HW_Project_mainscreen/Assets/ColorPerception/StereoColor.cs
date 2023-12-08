@@ -9,10 +9,6 @@ using UnityEngine.Networking;
 
 public class StereoColor : MonoBehaviour
 {
-    public static StereoColor Instance; // instance
-
-
-
     // Declare InputAction variables for primary, secondary, and adjust actions
     public InputAction primary, secondary, adjust;
 
@@ -56,19 +52,8 @@ public class StereoColor : MonoBehaviour
     private GameObject backwallRL;
     private GameObject backwallRR;
 
-    void Awake()
-    {
-        // Ensure there is only one instance of the script
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+    private Camera RRenderTextureCamera;
+    public RenderTexture RRenderTexture;
 
     void Start()
     {
@@ -95,6 +80,25 @@ public class StereoColor : MonoBehaviour
 
         // Change name
         right.name = "Right Environment";
+        right.transform.Find("LeftEnvironmentCam").gameObject.name = "RightEnvironmentCam";
+        
+        // Set right side camera
+        RRenderTextureCamera = right.transform.Find("RightEnvironmentCam").gameObject.GetComponent<Camera>();
+
+        // Set the camera's target texture to the specified render texture
+        RRenderTextureCamera.targetTexture = RRenderTexture;
+
+        // set culling mask for right
+        int currentCullingMask = RRenderTextureCamera.cullingMask;
+        int layer7Mask = 1 << 7;
+        int invertedLayer7Mask = ~layer7Mask;
+        int newCullingMask = currentCullingMask & invertedLayer7Mask;
+        RRenderTextureCamera.cullingMask = newCullingMask;
+
+        currentCullingMask = RRenderTextureCamera.cullingMask;
+        int layer8Mask = 1 << 8;
+        newCullingMask = currentCullingMask | layer8Mask;
+        RRenderTextureCamera.cullingMask = newCullingMask;
 
         // Store references to the newly created right side back walls
         backwallRL = right.transform.Find("Walls/Backwall Left").gameObject;
