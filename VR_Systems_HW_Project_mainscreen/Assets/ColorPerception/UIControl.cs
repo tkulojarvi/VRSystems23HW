@@ -5,6 +5,76 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/*
+-------------------------
+   SELECT STATE STRINGS
+-------------------------
+
+The `selectionState` variable is used to determine the current state of the user interface, guiding the behavior of button clicks and other interactions. The following are the possible `selectionState` strings and their corresponding usage:
+
+1. **Main/ColorRGB**
+   - Description: Main menu state for selecting RGB color settings.
+   - Usage: Initial state when the application starts.
+
+2. **Main/ColorHSV**
+   - Description: Main menu state for selecting HSV color settings.
+   - Usage: Transition from RGB to HSV color settings.
+
+3. **Main/EyeAdapt**
+   - Description: Main menu state for adjusting eye adaptation settings.
+   - Usage: Adjusting settings related to eye adaptation.
+
+4. **Main/SquareControl**
+   - Description: Main menu state for configuring square control settings.
+   - Usage: Adjusting settings related to square control.
+
+5. **Main/KeyboardInput**
+   - Description: Main menu state for configuring keyboard input settings.
+   - Usage: Adjusting settings related to keyboard input.
+
+6. **Main/Start**
+   - Description: Main menu state for starting the application.
+   - Usage: Transition from the main menu to the in-game environment.
+
+7. **ColorRGB/LL, ColorRGB/LR, ColorRGB/RL, ColorRGB/RR**
+   - Description: Sub-states for configuring RGB values for different walls.
+   - Usage: Adjusting RGB values for the Left-Left (LL), Left-Right (LR), Right-Left (RL), and Right-Right (RR) walls.
+
+8. **EyeAdapt/L, EyeAdapt/R**
+   - Description: Sub-states for configuring eye adaptation settings for the left and right eyes.
+   - Usage: Adjusting eye adaptation settings for the left (L) and right (R) eyes.
+
+9. **SquareControl/SquareControl**
+   - Description: Sub-state for configuring square control settings.
+   - Usage: Active when square control is enabled, allowing the user to move and resize squares.
+
+10. **Keyboard/Keyboard**
+    - Description: Sub-state for configuring keyboard input settings.
+    - Usage: Active when keyboard input settings are being adjusted.
+
+11. **InGame**
+    - Description: State representing the in-game environment.
+    - Usage: Active when the user is in the game, transitioning from the main menu.
+
+------------------------
+  BUTTON AND SLIDER EVENTS
+------------------------
+
+The script responds to button clicks and slider value changes by executing specific functions. :
+
+- `OnLeftButtonClick` and `OnRightButtonClick`: Change the `selectionState` based on left and right button clicks.
+
+- `OnUpButtonClick` and `OnDownButtonClick`: Placeholder functions for handling up and down button clicks.
+
+- `OnSelectButtonClick`: Executes actions based on the `selectionState` when the select button is clicked.
+
+- `OnBackButtonClick`: Reverts to the previous state when the back button is clicked.
+
+- `OnExitButtonClick`: Either exits to the main menu or quits the game, depending on the `selectionState`.
+
+- Slider value change events: Update corresponding color values and apply changes to the environment.
+*/
+
 public class UIControl : MonoBehaviour
 {
     public GameObject arrowRight;
@@ -21,6 +91,9 @@ public class UIControl : MonoBehaviour
 
     public GameObject backButton;
     private Button back;
+
+    public GameObject exitButton;
+    private Button exit;
 
     public GameObject LL_ALL_SLIDERS;
     public GameObject LR_ALL_SLIDERS;
@@ -75,6 +148,8 @@ public class UIControl : MonoBehaviour
     private Slider Right_Eye_Blue;
 
     public TextMeshProUGUI textMeshSelect;
+    public GameObject textMeshSquare;
+    public GameObject textMeshKeyboard;
     private string selectionState;
 
     private float LL_RedValue;
@@ -102,7 +177,7 @@ public class UIControl : MonoBehaviour
     private float Right_Eye_Green_Value;
     private float Right_Eye_Blue_Value;
 
-    private string colorState;
+    //private string colorState;
 
     public GameObject keyboard_ALL;
 
@@ -111,13 +186,13 @@ public class UIControl : MonoBehaviour
     public GameObject squareController;
     private SquareControl squareControl;
 
-    public GameObject playerPosition;
+    public GameObject playerInGamePosition;
+    public GameObject playerMenuPosition;
     public GameObject XROrigin;
 
     public TextMeshProUGUI textMeshLLR;
     public TextMeshProUGUI textMeshLLG;
     public TextMeshProUGUI textMeshLLB;
-    
 
     void Start()
     {
@@ -128,6 +203,7 @@ public class UIControl : MonoBehaviour
         down = arrowDown.GetComponent<Button>();
         select = selectUI.GetComponent<Button>();
         back = backButton.GetComponent<Button>();
+        exit = exitButton.GetComponent<Button>();
 
         LL_Red = LL_Slider_Red.GetComponent<Slider>();
         LL_Green = LL_Slider_Green.GetComponent<Slider>();
@@ -159,6 +235,7 @@ public class UIControl : MonoBehaviour
         down.onClick.AddListener(OnDownButtonClick);
         select.onClick.AddListener(OnSelectButtonClick);
         back.onClick.AddListener(OnBackButtonClick);
+        exit.onClick.AddListener(OnExitButtonClick);
 
         LL_Red.onValueChanged.AddListener(OnLL_RedValueChanged);
         LL_Green.onValueChanged.AddListener(OnLL_GreenValueChanged);
@@ -187,7 +264,7 @@ public class UIControl : MonoBehaviour
         selectionState = "Main/ColorRGB";
 
         // Set initial color state
-        colorState = "RGB";
+        //colorState = "RGB";
 
         // Set reference to StereoColor
         stereoColor = leftEnvironment.GetComponent<StereoColor>();
@@ -200,8 +277,8 @@ public class UIControl : MonoBehaviour
 void SetInitialColors()
 {
     // Set default colors
-    stereoColor.SetWallColor(stereoColor.RGBValuesToColor(200f, 100f, 100f), LLWall);
-    stereoColor.SetWallColor(stereoColor.RGBValuesToColor(100f, 100f, 100f), LRWall);
+    stereoColor.SetWallColor(stereoColor.RGBValuesToColor(100f, 200f, 100f), LLWall);
+    stereoColor.SetWallColor(stereoColor.RGBValuesToColor(200f, 100f, 100f), LRWall);
     stereoColor.SetWallColor(stereoColor.RGBValuesToColor(100f, 100f, 100f), RLWall);
     stereoColor.SetWallColor(stereoColor.RGBValuesToColor(100f, 100f, 100f), RRWall);
 }
@@ -231,31 +308,31 @@ UP DOWN LEFT RIGHT ARROWS
 
             case "Main/ColorHSV":
                 // CHANGE TO RGB
-                textMeshSelect.text = "ColorRGB";
+                textMeshSelect.text = "Color\nRGB";
                 selectionState = "Main/ColorRGB";
                 break;
 
             case "Main/EyeAdapt":
                 // CHANGE TO HSV
-                textMeshSelect.text = "ColorHSV";
+                textMeshSelect.text = "Color\nHSV";
                 selectionState = "Main/ColorHSV";
                 break;
 
             case "Main/SquareControl":
                 // CHANGE TO EYEADAPT
-                textMeshSelect.text = "EyeAdapt";
+                textMeshSelect.text = "Eye\nAdapt";
                 selectionState = "Main/EyeAdapt";
                 break;
             
             case "Main/KeyboardInput":
                 // CHANGE TO SQUARE
-                textMeshSelect.text = "SquareControl";
+                textMeshSelect.text = "Square\nControl";
                 selectionState = "Main/SquareControl";
                 break;
 
             case "Main/Start":
                 // CHANGE TO KEYBOARD
-                textMeshSelect.text = "KeyboardInput";
+                textMeshSelect.text = "Keyboard\nInput";
                 selectionState = "Main/KeyboardInput";
                 break;
             /*
@@ -317,25 +394,14 @@ UP DOWN LEFT RIGHT ARROWS
                 selectionState = "EyeAdapt/L";
                 break;
 
-            /*
-            ----------------
-            ARROWS
-            ----------------
-            */
-
-            // square movement here
-
             default:
-                Debug.Log("DEFAULT");
+                Debug.Log("Left Error");
                 break;
         }
     }
 
     void OnRightButtonClick()
     {
-        // Do something different when the right button is clicked
-        Debug.Log("Right Button Clicked!");
-
         // CHANGE SELECTION STATE
 
         switch (selectionState)
@@ -347,25 +413,25 @@ UP DOWN LEFT RIGHT ARROWS
             */
             case "Main/ColorRGB":
                 // CHANGE TO HSV
-                textMeshSelect.text = "ColorHSV";
+                textMeshSelect.text = "Color\nHSV";
                 selectionState = "Main/ColorHSV";
                 break;
 
             case "Main/ColorHSV":
                 // CHANGE TO EYEADAPT
-                textMeshSelect.text = "EyeAdapt";
+                textMeshSelect.text = "Eye\nAdapt";
                 selectionState = "Main/EyeAdapt";
                 break;
 
             case "Main/EyeAdapt":
                 // CHANGE TO SQUARE
-                textMeshSelect.text = "SquareControl";
+                textMeshSelect.text = "Square\nControl";
                 selectionState = "Main/SquareControl";
                 break;
 
             case "Main/SquareControl":
                 // CHANGE TO KEYBOARD
-                textMeshSelect.text = "KeyboardInput";
+                textMeshSelect.text = "Keyboard\nInput";
                 selectionState = "Main/KeyboardInput";
                 break;
             
@@ -377,7 +443,7 @@ UP DOWN LEFT RIGHT ARROWS
 
             case "Main/Start":
                 // CHANGE TO RGB
-                textMeshSelect.text = "ColorRGB";
+                textMeshSelect.text = "Color\nRGB";
                 selectionState = "Main/ColorRGB";
                 break;
             
@@ -439,16 +505,8 @@ UP DOWN LEFT RIGHT ARROWS
                 selectionState = "EyeAdapt/L";
                 break;
 
-            /*
-            ----------------
-            ARROWS
-            ----------------
-            */
-
-            // square movement here
-
             default:
-                Debug.Log("DEFAULT");
+                Debug.Log("Right Error");
                 break;
         }
     }
@@ -456,7 +514,7 @@ UP DOWN LEFT RIGHT ARROWS
     void OnUpButtonClick()
     {
         // Do something different when the right button is clicked
-        Debug.Log("up Button Clicked!");
+        //Debug.Log("up Button Clicked!");
 
         // move squares up
     }
@@ -464,7 +522,7 @@ UP DOWN LEFT RIGHT ARROWS
     void OnDownButtonClick()
     {
         // Do something different when the right button is clicked
-        Debug.Log("down Button Clicked!");
+        //Debug.Log("down Button Clicked!");
 
         // move squares down
     }
@@ -511,7 +569,7 @@ SELECTION AND EXIT CONTROL
                 selectUI.SetActive(false);
                 // ENABLE 
                 squareControl.squareControlEnabled = true;
-                textMeshSelect.text = "Use thumbsticks to move and resize";
+                textMeshSquare.SetActive(true);
                 // CHANGE SELECTION STATE
                 selectionState = "SquareControl/SquareControl";
                 break;
@@ -521,6 +579,7 @@ SELECTION AND EXIT CONTROL
                 selectUI.SetActive(false);
                 // ENABLE KEYBOARD INPUT
                 keyboard_ALL.SetActive(true);
+                textMeshKeyboard.SetActive(true);
                 // CHANGE SELECTION STATE
                 selectionState = "Keyboard/Keyboard";
                 break;
@@ -529,19 +588,20 @@ SELECTION AND EXIT CONTROL
                 // DISABLE SELECT
                 selectUI.SetActive(false);
                 // ENTER ROOM
-                XROrigin.transform.position = playerPosition.transform.position;
+                XROrigin.transform.position = playerInGamePosition.transform.position;
                 // CHANGE SELECTION STATE
                 selectionState = "InGame";
                 break;
 
             default:
-                Debug.Log("DEFAULT");
+                Debug.Log("Select Error");
                 break;
         }
     }
 
     void OnBackButtonClick()
     {
+        Debug.Log("BackButton Pressed");
         
         switch (selectionState)
         {
@@ -591,12 +651,12 @@ SELECTION AND EXIT CONTROL
                 selectionState = "Main/EyeAdapt";
                 break;
 
-            // ARROWS
             case "SquareControl/SquareControl":
                 // CHANGE TO MAIN/SQUARE
                 selectUI.SetActive(true);
                 squareControl.squareControlEnabled = false;
-                textMeshSelect.text = "SquareControl";
+                textMeshSquare.SetActive(true);
+                textMeshSelect.text = "Square\nControl";
                 selectionState = "Main/SquareControl";
                 break;
 
@@ -604,13 +664,34 @@ SELECTION AND EXIT CONTROL
             case "Keyboard/Keyboard":
                 // CHANGE TO Main/Keyboard
                 keyboard_ALL.SetActive(false);
+                textMeshKeyboard.SetActive(false);
                 selectUI.SetActive(true);
                 selectionState = "Main/KeyboardInput";
                 break;
 
             default:
-                Debug.Log("DEFAULT");
+                Debug.Log("BackButton Error");
                 break;
+        }
+    }
+
+    void OnExitButtonClick()
+    {
+        if(selectionState == "InGame")
+        {
+            // Exit to menu
+            // ENABLE SELECT
+            selectUI.SetActive(true);
+            // EXIT ROOM
+            XROrigin.transform.position = playerMenuPosition.transform.position;
+            // CHANGE SELECTION STATE
+            selectionState = "Main/Start";
+        }
+
+        else
+        {
+            // Exit program
+            Quit.Instance.QuitGame();
         }
     }
 
@@ -623,8 +704,9 @@ RGB WALL VALUE SLIDERS
     void OnLL_RedValueChanged(float value)
     {
         // Update color value
-        LL_RedValue = value;
-        textMeshLLR.text = value.ToString();
+        // Convert the float value to RGB between 0 and 255
+        LL_RedValue = Mathf.RoundToInt(value * 255f);
+        textMeshLLR.text = LL_RedValue.ToString();
 
         // UPDATE WALL COLOR
         Color color;
@@ -635,8 +717,9 @@ RGB WALL VALUE SLIDERS
     void OnLL_GreenValueChanged(float value)
     {
         // Update color value
-        LL_GreenValue = value;
-        textMeshLLG.text = value.ToString();
+        // Convert the float value to RGB between 0 and 255
+        LL_GreenValue = Mathf.RoundToInt(value * 255f);
+        textMeshLLG.text = LL_GreenValue.ToString();
 
         // UPDATE WALL COLOR
         Color color;
@@ -647,8 +730,9 @@ RGB WALL VALUE SLIDERS
     void OnLL_BlueValueChanged(float value)
     {
         // Update color value
-        LL_BlueValue = value;
-        textMeshLLB.text = value.ToString();
+        // Convert the float value to RGB between 0 and 255
+        LL_BlueValue = Mathf.RoundToInt(value * 255f);
+        textMeshLLB.text = LL_BlueValue.ToString();
 
         // UPDATE WALL COLOR
         Color color;

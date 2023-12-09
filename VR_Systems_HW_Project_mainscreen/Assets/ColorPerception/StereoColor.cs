@@ -27,6 +27,7 @@ public class StereoColor : MonoBehaviour
     bool main = false;
 
     // InputData class
+    public GameObject inputDataObject;
     InputData inputData;
 
     // Lights for left and right
@@ -57,24 +58,20 @@ public class StereoColor : MonoBehaviour
 
     void Start()
     {
-        // Check if the initialization has already been done
+
         if (init)
             return;
-
-        // Set init to true to prevent further initialization
+            
         init = true;
-        // Set main to true to indicate the main functionality is active
         main = true;
 
-        // Get the InputData component attached to the GameObject
-        inputData = GetComponent<InputData>();
+        // Get the InputData component
+        inputData = inputDataObject.GetComponent<InputData>();
 
-        // Enable input actions for primary, secondary, and adjust
         primary.Enable();
         secondary.Enable();
         adjust.Enable();
 
-        // Create a new GameObject for the right camera and set its layer
         GameObject right = Instantiate(transform.gameObject, null);
         right.SetLayerRecursively(rightTest.gameObject.layer);
 
@@ -114,10 +111,8 @@ public class StereoColor : MonoBehaviour
 
     private void Update()
     {
-        // Check if the main functionality is active
         if(!main) return;
 
-        // Call the Adjusting method for color adjustment
         Adjusting();
     }
 

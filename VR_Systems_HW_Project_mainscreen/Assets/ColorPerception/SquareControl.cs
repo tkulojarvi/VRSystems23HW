@@ -27,17 +27,17 @@ public class SquareControl : MonoBehaviour
     public float resizeAmount = 0.1f;
 
     // XR Input
+    public GameObject inputDataObject;
     private InputData _inputData;
 
-    public bool squareControlEnabled = true;
+    public bool squareControlEnabled = false;
 
     void Start()
     {
         rb_L = squareLeft.GetComponent<Rigidbody>();
         rb_R = squareRight.GetComponent<Rigidbody>();
 
-        GameObject UIController = GameObject.Find("UIController");
-        _inputData = UIController.GetComponent<InputData>();
+        _inputData = inputDataObject.GetComponent<InputData>();
     }
 
     void Update()
@@ -49,23 +49,25 @@ public class SquareControl : MonoBehaviour
             {
                 float threshold = 0.5f; // Threshold for recognizing input
 
-                if((leftAnalog.x > threshold || leftAnalog.y < -threshold))
+                Debug.Log(leftAnalog.y);
+
+                if((leftAnalog.x > threshold))
                 {
                     // RIGHT
                     moveCloser = true;
                 }
-                else if((leftAnalog.x < -threshold || leftAnalog.y > threshold))
+                else if((leftAnalog.x < -threshold))
                 {
                     // LEFT
                     moveAway = true;
                 }
 
-                else if (leftAnalog.y > threshold || leftAnalog.x > threshold) 
+                else if (leftAnalog.y > threshold) 
                 {
                     // UP
                     moveUp = true;
                 }
-                else if(leftAnalog.y < -threshold || leftAnalog.x < -threshold)
+                else if(leftAnalog.y < -threshold)
                 {
                     // DOWN
                     moveDown = true;
@@ -74,6 +76,7 @@ public class SquareControl : MonoBehaviour
                 else
                 {
                     // Check for joystick release
+                    
                     moveUp = false;
                     upMovement = Vector3.zero;
                     moveDown = false;
@@ -82,6 +85,7 @@ public class SquareControl : MonoBehaviour
                     rightMovement = Vector3.zero;
                     moveAway = false;
                     leftMovement = Vector3.zero;
+                    
                 }
             }
 
