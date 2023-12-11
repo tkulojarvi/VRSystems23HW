@@ -59,6 +59,11 @@ public class StereoColor : MonoBehaviour
 
     private float adaptationTimerInput = 0f;
 
+    public GameObject objectToFlash;
+    public float flashDuration = 0.5f;
+    public int flashCount = 2;
+    public float timeBetweenFlashes = 0.5f;
+
     void Start()
     {
 
@@ -546,7 +551,28 @@ public class StereoColor : MonoBehaviour
 
     private void DisplayErrorMessage()
     {
-        Debug.Log("ERROR");
+        StartCoroutine(FlashObject());
+    }
+
+    IEnumerator FlashObject()
+    {
+        for (int i = 0; i < flashCount; i++)
+        {
+            // Activate the object
+            objectToFlash.SetActive(true);
+
+            // Wait for a short duration
+            yield return new WaitForSeconds(flashDuration);
+
+            // Deactivate the object
+            objectToFlash.SetActive(false);
+
+            // Wait for a short duration
+            yield return new WaitForSeconds(timeBetweenFlashes);
+        }
+
+        // Deactivate the object after the flashing is done
+        objectToFlash.SetActive(false);
     }
 
 }
