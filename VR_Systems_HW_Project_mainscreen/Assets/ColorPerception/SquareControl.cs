@@ -4,6 +4,7 @@ using UnityEngine;
 
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
+using UnityEngine.UI;
 
 public class SquareControl : MonoBehaviour
 {
@@ -26,85 +27,93 @@ public class SquareControl : MonoBehaviour
 
     public float resizeAmount = 0.1f;
 
-    // XR Input
-    public GameObject inputDataObject;
-    private InputData _inputData;
-
-    public bool squareControlEnabled = false;
+    public Toggle toggleObject;
+    public GameObject toggleInstructions;
 
     void Start()
     {
         rb_L = squareLeft.GetComponent<Rigidbody>();
         rb_R = squareRight.GetComponent<Rigidbody>();
-
-        _inputData = inputDataObject.GetComponent<InputData>();
     }
+
+    void OnEnable()
+    {
+        // Called when the script is enabled
+        // Enable the InputSystem controls
+        InputSystem.EnableDevice(Keyboard.current);
+    }
+
+    void OnDisable()
+    {
+        // Called when the script is disabled
+        // Disable the InputSystem controls
+        InputSystem.DisableDevice(Keyboard.current);
+    }
+
 
     void Update()
     {
-        if(squareControlEnabled == true)
+        if(toggleObject.isOn == false)
         {
-            // MOVEMENT
-            if (_inputData._leftController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 leftAnalog))
+            toggleInstructions.SetActive(false);
+        }
+
+        if(toggleObject.isOn == true)
+        {
+            toggleInstructions.SetActive(true);
+
+            // KEYBOARD
+            // Up
+            if (Keyboard.current.upArrowKey.wasPressedThisFrame)
             {
-                float threshold = 0.5f; // Threshold for recognizing input
-
-                Debug.Log(leftAnalog.y);
-
-                if((leftAnalog.x > threshold))
-                {
-                    // RIGHT
-                    moveCloser = true;
-                }
-                else if((leftAnalog.x < -threshold))
-                {
-                    // LEFT
-                    moveAway = true;
-                }
-
-                else if (leftAnalog.y > threshold) 
-                {
-                    // UP
-                    moveUp = true;
-                }
-                else if(leftAnalog.y < -threshold)
-                {
-                    // DOWN
-                    moveDown = true;
-                }
-
-                else
-                {
-                    // Check for joystick release
-                    
-                    moveUp = false;
-                    upMovement = Vector3.zero;
-                    moveDown = false;
-                    downMovement = Vector3.zero;
-                    moveCloser = false;
-                    rightMovement = Vector3.zero;
-                    moveAway = false;
-                    leftMovement = Vector3.zero;
-                    
-                }
+                moveUp = true;
+            }
+            // Down
+            else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+            {
+                moveDown = true;
+            }
+            // Right
+            else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
+            {
+                moveCloser = true;
+            }
+            // Left
+            else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
+            {
+                moveAway = true;
+            }
+            // Resize Up
+            else if (Keyboard.current.aKey.wasPressedThisFrame)
+            {
+                ResizeSquares(1 + resizeAmount);
+            }
+            // Resize Down
+            else if (Keyboard.current.dKey.wasPressedThisFrame)
+            {
+                ResizeSquares(1 - resizeAmount);
             }
 
-            // RESIZER
-            // Up and Down
-            if (_inputData._rightController.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 rightAnalog))
+            // Check for key releases
+            if (Keyboard.current.upArrowKey.wasReleasedThisFrame)
             {
-                float threshold = 0.5f;
-
-                if (rightAnalog.y > threshold || rightAnalog.x > threshold) 
-                {
-                    // UP
-                    ResizeSquares(1 + resizeAmount);
-                }
-                else if(rightAnalog.y < -threshold || rightAnalog.x < -threshold)
-                {
-                    // DOWN
-                    ResizeSquares(1 - resizeAmount);
-                }
+                moveUp = false;
+                upMovement = Vector3.zero;
+            }
+            else if (Keyboard.current.downArrowKey.wasReleasedThisFrame)
+            {
+                moveDown = false;
+                downMovement = Vector3.zero;
+            }
+            else if (Keyboard.current.rightArrowKey.wasReleasedThisFrame)
+            {
+                moveCloser = false;
+                rightMovement = Vector3.zero;
+            }
+            else if (Keyboard.current.leftArrowKey.wasReleasedThisFrame)
+            {
+                moveAway = false;
+                leftMovement = Vector3.zero;
             }
 
             // Adjust the values continuously while the keys are held down

@@ -5,6 +5,7 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Networking;
+using System;
 
 
 public class StereoColor : MonoBehaviour
@@ -55,6 +56,8 @@ public class StereoColor : MonoBehaviour
 
     private Camera RRenderTextureCamera;
     public RenderTexture RRenderTexture;
+
+    private float adaptationTimerInput = 0f;
 
     void Start()
     {
@@ -113,9 +116,9 @@ public class StereoColor : MonoBehaviour
     {
         if(!main) return;
 
-        Adjusting();
+        //Adjusting();
     }
-
+/*
     void Adjusting()
     {
         // If state is equal to 0, then assign the value of leftTest to match; otherwise, assign the value of rightTest to match
@@ -180,76 +183,158 @@ public class StereoColor : MonoBehaviour
             // Reset inputHold if no buttons are pressed
             inputHold = false;
     }
-
+*/
    
-    public void SetColorLeft(string color)
-    {
-        // Check if the input color is not null and set the color of leftTest
-        if(color == null) return;
-        leftTest.sharedMaterial.color = StringToColor(color);
-    }
-
     
-    public void SetColorRight(string color)
+    public void SetWallColorLL(string color)
     {
-        // Check if the input color is not null and set the color of rightTest
-        if(color == null) return;
-        rightTest.sharedMaterial.color = StringToColor(color);
+        if(color != null && CheckValidString(color) == true)
+        {
+            // Get the Renderer components
+            Material backwall_LL_Material = backwallLL.GetComponent<Renderer>().material;
+            Debug.Log("nnnnnnnnnnnnnnnnnnnn");
+            // Set the color of the backwallLeft and backwallRight components
+            backwall_LL_Material.color = StringToColor(color);
+        }
+        else
+        {
+            DisplayErrorMessage();
+        }
     }
 
+    public void SetWallColorLR(string color)
+    {
+        if(color != null && CheckValidString(color) == true)
+        {
+            // Get the Renderer components
+            Material backwall_LR_Material = backwallLL.GetComponent<Renderer>().material;
+
+            // Set the color of the backwallLeft and backwallRight components
+            backwall_LR_Material.color = StringToColor(color);
+        }
+        else
+        {
+            DisplayErrorMessage();
+        }
+    }
+
+    public void SetWallColorRL(string color)
+    {
+        if(color != null && CheckValidString(color) == true)
+        {
+            // Get the Renderer components
+            Material backwall_RL_Material = backwallLL.GetComponent<Renderer>().material;
+
+            // Set the color of the backwallLeft and backwallRight components
+            backwall_RL_Material.color = StringToColor(color);
+        }
+        else
+        {
+            DisplayErrorMessage();
+        }
+    }
+
+    public void SetWallColorRR(string color)
+    {
+        if(color != null && CheckValidString(color) == true)
+        {
+            // Get the Renderer components
+            Material backwall_RR_Material = backwallLL.GetComponent<Renderer>().material;
+
+            // Set the color of the backwallLeft and backwallRight components
+            backwall_RR_Material.color = StringToColor(color);
+        }
+        else
+        {
+            DisplayErrorMessage();
+        }
+    }
+
+    public void SetEyeAdaptationColorLeft(string color)
+    {
+        if(color != null && CheckValidString(color) == true)
+        {
+            ColorFade.Instance.screenColorL = StringToColor(color);
+        }
+        else
+        {
+            DisplayErrorMessage();
+        }
+    }
+
+    public void SetEyeAdaptationColorRight(string color)
+    {
+        if(color != null && CheckValidString(color) == true)
+        {
+            ColorFade.Instance.screenColorR = StringToColor(color);
+        }
+        else
+        {
+            DisplayErrorMessage();
+        }
+    }
+
+    public void EyeAdaptationTimer(string time)
+    {
+        // Attempt to parse the string into a float
+        if (float.TryParse(time, out adaptationTimerInput))
+        {
+            ColorFade.Instance.fadeDuration = adaptationTimerInput;
+        }
+        else
+        {
+            // Parsing failed, handle the error as needed
+            DisplayErrorMessage();
+        }
+    }
     
     public void SetLightColorLeft(string color)
     {
-        // Check if the input color is not null and set the color of leftLight
-        if(color == null) return;
-        leftLight.color = StringToColor(color);
+        if(color != null && CheckValidString(color) == true)
+        {
+            leftLight.color = StringToColor(color);
+        }
+        else
+        {
+            DisplayErrorMessage();
+        }
     }
 
-    
     public void SetLightColorRight(string color)
     {
-        // Check if the input color is not null and set the color of rightLight
-        if(color == null) return;
-        rightLight.color = StringToColor(color);
-    }
-
-    Color TemperatureToColor(float temp)
-    {
-        // Initialize a black color
-        Color color = Color.black;
-        // Normalize the temperature
-        temp /= 100;
-
-        // Check temperature range
-        if (temp <= 66) {
-            color.r = 1f;
-            color.g = Mathf.Clamp((99.4708025861f * Mathf.Log(temp) - 161.1195681661f)/255f, 0, 1.0f);
-            color.b = (138.5177312231f * Mathf.Log(temp - 10) - 305.0447927307f) / 255f;
-        }
-        else {
-            color.r = Mathf.Clamp(329.698727446f * Mathf.Pow(temp - 60, -0.1332047592f) / 255f, 0, 1.0f);
-            color.g = Mathf.Clamp(288.1221695283f * Mathf.Pow(temp - 60, -0.0755148492f) / 255f, 0, 1.0f);
-            color.b = 1f;
-        }
-        return color;
-    }
-
-    Color StringToColor(string color)
-    {
-        // Check if the color is represented in hexadecimal format
-        if (color[0] == '#')
+        if(color != null && CheckValidString(color) == true)
         {
-            // Try parsing the color string in HTML format
-            Color newCol = Color.white;
-            if (ColorUtility.TryParseHtmlString(color, out newCol))
-            {
-                // Return the parsed color
-                return newCol;
-            }
+            rightLight.color = StringToColor(color);
         }
-        // If not in HTML format, assume RGB format and parse accordingly
-        string[] rgb = color.Split(',');
-        return new Color(int.Parse(rgb[0]) / 255f, int.Parse(rgb[1]) / 255f, int.Parse(rgb[2]) / 255f);
+        else
+        {
+            DisplayErrorMessage();
+        }
+    }
+
+    public void SetColorLeft(string color)
+    {
+        if(color != null && CheckValidString(color) == true)
+        {
+            leftTest.sharedMaterial.color = StringToColor(color);
+        }
+        else
+        {
+            DisplayErrorMessage();
+        }
+    }
+
+    public void SetColorRight(string color)
+    {
+        if(color != null && CheckValidString(color) == true)
+        {
+            rightTest.sharedMaterial.color = StringToColor(color);
+        }
+
+        else
+        {
+            DisplayErrorMessage();
+        }
     }
 
     // Method to load an image asynchronously
@@ -286,45 +371,182 @@ public class StereoColor : MonoBehaviour
         }
     }
 
-    public Color RGBValuesToColor(float r, float g, float b)
+    Color TemperatureToColor(float temp)
     {
-        float redValue = r;   // red float value
-        float greenValue = g; // green float value
-        float blueValue = b;  // blue float value
+        // Initialize a black color
+        Color color = Color.black;
+        // Normalize the temperature
+        temp /= 100;
 
-        // Normalize
-        Color rgbColor = new Color(redValue / 255f, greenValue / 255f, blueValue / 255f);
-
-        return rgbColor;
+        // Check temperature range
+        if (temp <= 66) {
+            color.r = 1f;
+            color.g = Mathf.Clamp((99.4708025861f * Mathf.Log(temp) - 161.1195681661f)/255f, 0, 1.0f);
+            color.b = (138.5177312231f * Mathf.Log(temp - 10) - 305.0447927307f) / 255f;
+        }
+        else {
+            color.r = Mathf.Clamp(329.698727446f * Mathf.Pow(temp - 60, -0.1332047592f) / 255f, 0, 1.0f);
+            color.g = Mathf.Clamp(288.1221695283f * Mathf.Pow(temp - 60, -0.0755148492f) / 255f, 0, 1.0f);
+            color.b = 1f;
+        }
+        return color;
     }
 
-    public void SetWallColor(Color color, string selectedWall)
+    Color StringToColor(string color)
     {
-        // Get the Renderer components
-        Material backwall_LL_Material = backwallLL.GetComponent<Renderer>().material;
-        Material backwall_LR_Material = backwallLR.GetComponent<Renderer>().material;
-        Material backwall_RL_Material = backwallRL.GetComponent<Renderer>().material;
-        Material backwall_RR_Material = backwallRR.GetComponent<Renderer>().material;
-
-        // Set the color of the backwallLeft and backwallRight components
-        if(selectedWall == "LL")
+        // OPTION 1: RGB FORMAT
+        if(ColorModeControl.Instance.toggleRGB.isOn == true)
         {
-            backwall_LL_Material.color = color;
+            string[] rgb = color.Split(',');
+            return new Color(int.Parse(rgb[0]) / 255f, int.Parse(rgb[1]) / 255f, int.Parse(rgb[2]) / 255f);
         }
 
-        else if(selectedWall == "LR")
+        // OPTION 2: HEX FORMAT
+        else if(ColorModeControl.Instance.toggleHEX.isOn == true)
         {
-            backwall_LR_Material.color = color;
+            // Try parsing the color string in HTML format
+            Color newCol = Color.white;
+            ColorUtility.TryParseHtmlString(color, out newCol);
+            
+            // Return the parsed color
+            return newCol;
         }
 
-        else if(selectedWall == "RL")
+        // OPTION 3: HSV FORMAT
+        else
         {
-            backwall_RL_Material.color = color;
-        }
-
-        else if(selectedWall == "RR")
-        {
-            backwall_RR_Material.color = color;
+            string[] hsv = color.Split(',');
+            return new Color(int.Parse(hsv[0]) / 360f, int.Parse(hsv[1]) / 100f, int.Parse(hsv[2]) / 100f);
         }
     }
+
+    private bool CheckValidString(string color)
+    {
+        // Split the string into individual values
+        string[] colorValues = color.Split(',');
+
+        // OPTION 1: RGB FORMAT
+        if(ColorModeControl.Instance.toggleRGB.isOn == true)
+        {
+           return IsRGBStringValid(colorValues);
+        }
+
+        // OPTION 2: HEX FORMAT
+        else if(ColorModeControl.Instance.toggleHEX.isOn == true)
+        {
+            return IsHexValueValid(color);
+        }
+
+        // OPTION 3: HSV FORMAT
+        else
+        {
+            return IsHSVValueValid(colorValues);
+        }
+    }
+
+    private bool IsRGBStringValid(string[] rgbValues)
+    {
+        // Check if there are exactly three values
+        if (rgbValues.Length != 3)
+        {
+            return false;
+        }
+
+        // Try parsing each value into an integer
+        foreach (string value in rgbValues)
+        {
+            if (!int.TryParse(value, out int intValue))
+            {
+                return false; // Not a valid integer
+            }
+
+            // Check if the integer is within the valid range (0 to 255)
+            if (intValue < 0 || intValue > 255)
+            {
+                return false; // Out of bounds
+            }
+        }
+
+        // If all checks pass, the RGB string is valid
+        return true;
+    }
+
+    private bool IsHexValueValid(string hexValue)
+    {
+        // Remove a possible leading "#" symbol
+        if (hexValue[0] == '#')
+        {
+            hexValue = hexValue.Substring(1);
+        }
+
+        // Check if the string has a valid length (6 or 8 characters)
+        if (hexValue.Length != 6 && hexValue.Length != 8)
+        {
+            return false;
+        }
+
+        // Check if all characters are valid hex characters
+        foreach (char c in hexValue)
+        {
+            if (!IsHexCharacter(c))
+            {
+                return false;
+            }
+        }
+
+        // If all checks pass, the hex value is valid
+        return true;
+    }
+
+    private bool IsHexCharacter(char c)
+    {
+        // Check if the character is a valid hex digit (0-9, A-F, a-f)
+        return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
+    }
+
+    private bool IsHSVValueValid(string[] hsvValues)
+    {
+        // Check if there are exactly three values
+        if (hsvValues.Length != 3)
+        {
+            return false;
+        }
+
+        // Try parsing each value into an integer
+        foreach (string value in hsvValues)
+        {
+            if (!int.TryParse(value, out int intValue))
+            {
+                return false; // Not a valid integer
+            }
+
+            // Check if the integer is within the valid range for HSV
+            switch (Array.IndexOf(hsvValues, value))
+            {
+                case 0: // Hue
+                    if (intValue < 0 || intValue > 360)
+                    {
+                        return false;
+                    }
+                    break;
+
+                case 1: // Saturation
+                case 2: // Value
+                    if (intValue < 0 || intValue > 100)
+                    {
+                        return false;
+                    }
+                    break;
+            }
+        }
+
+        // If all checks pass, the HSV value is valid
+        return true;
+    }
+
+    private void DisplayErrorMessage()
+    {
+        Debug.Log("ERROR");
+    }
+
 }

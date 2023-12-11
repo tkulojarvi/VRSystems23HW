@@ -9,29 +9,77 @@ public class ColorFade : MonoBehaviour
 {
     public static ColorFade Instance; // instance
 
-    public Image colorScreenImage;  // Drag and drop your UI Image here
+    public Toggle eyeToggle;
+    public GameObject instructions;
+    public Image leftPreview;  // preview images (non-VR)
+    public Image rightPreview;
+
+
+    public Camera leftStereoCam;
+    public Camera rightStereoCam;
+    private Color originalColorL;
+    private Color originalColorR;
+
+
     public float fadeDuration = 5f;  // Duration for the screen effect in seconds
-    Color screenColor;
+    public Color screenColorL = Color.black;  // Left side eye color
+    public Color screenColorR = Color.black;  // Right side eye color
+    
+    void Awake()
+    {
+        // Ensure there is only one instance of the script
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // Persist across scene changes
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
-        colorScreenImage.color = Color.clear;  // Make sure the image is initially transparent
+        originalColorL = leftStereoCam.backgroundColor;
+        originalColorR = rightStereoCam.backgroundColor;
     }
 
-    public void EyeAdaptToColor(Color screenColor)
+    void OnEnable()
     {
-        StartCoroutine(TurnScreenColor(screenColor));
+        // Called when the script is enabled
+        // Enable the InputSystem controls
+        InputSystem.EnableDevice(Keyboard.current);
     }
 
-    IEnumerator TurnScreenColor(Color screenColor)
+    void OnDisable()
+    {
+        // Called when the script is disabled
+        // Disable the InputSystem controls
+        InputSystem.DisableDevice(Keyboard.current);
+    }
+
+    void Update()
+    {
+        Preview();
+        
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            StartCoroutine(TurnScreenColor());
+        }
+    }
+
+    IEnumerator TurnScreenColor()
     {
         // Fading in
         float timer = 0f;
+        
         while (timer < fadeDuration)
         {
             timer += Time.deltaTime;
             float progress = timer / fadeDuration;
-            colorScreenImage.color = Color.Lerp(Color.clear, screenColor, progress);
+            leftStereoCam.backgroundColor = Color.Lerp(originalColorL, screenColorL, progress);
+            rightStereoCam.backgroundColor = Color.Lerp(originalColorR, screenColorR, progress);
             yield return null;
         }
 
@@ -43,11 +91,33 @@ public class ColorFade : MonoBehaviour
         {
             timer += Time.deltaTime;
             float progress = timer / fadeDuration;
-            colorScreenImage.color = Color.Lerp(screenColor, Color.clear, progress);
+            leftStereoCam.backgroundColor = Color.Lerp(screenColorL, originalColorL, progress);
+            rightStereoCam.backgroundColor = Color.Lerp(screenColorR, originalColorR, progress);
             yield return null;
         }
 
         // Ensure the final color is completely clear
-        colorScreenImage.color = Color.clear;
+        leftStereoCam.backgroundColor = originalColorL;
+        rightStereoCam.backgroundColor = originalColorR;
+    }
+
+    void Preview()
+    {
+        leftPreview.color = screenColorL;
+        rightPreview.color = screenColorR;
+
+        if(eyeToggle.isOn == true)
+        {
+            leftPreview.enabled = true;
+            rightPreview.enabled = true;
+            instructions.SetActive(true);
+        }
+
+        else
+        {
+            leftPreview.enabled = false;
+            rightPreview.enabled = false;
+            instructions.SetActive(false);
+        }
     }
 }

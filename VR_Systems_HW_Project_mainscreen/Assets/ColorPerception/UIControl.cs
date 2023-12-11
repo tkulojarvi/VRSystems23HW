@@ -1,3 +1,4 @@
+/*
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -73,7 +74,7 @@ The script responds to button clicks and slider value changes by executing speci
 - `OnExitButtonClick`: Either exits to the main menu or quits the game, depending on the `selectionState`.
 
 - Slider value change events: Update corresponding color values and apply changes to the environment.
-*/
+
 
 public class UIControl : MonoBehaviour
 {
@@ -283,11 +284,11 @@ void SetInitialColors()
     stereoColor.SetWallColor(stereoColor.RGBValuesToColor(100f, 100f, 100f), RRWall);
 }
 
-/*
+
 --------------------------
 UP DOWN LEFT RIGHT ARROWS
 --------------------------
-*/
+
 
     void OnLeftButtonClick()
     {
@@ -295,11 +296,11 @@ UP DOWN LEFT RIGHT ARROWS
 
         switch (selectionState)
         {
-            /*
+            
             ----------------
             MAIN
             ----------------
-            */
+            
             case "Main/ColorRGB":
                 // CHANGE TO START
                 textMeshSelect.text = "Start";
@@ -335,11 +336,11 @@ UP DOWN LEFT RIGHT ARROWS
                 textMeshSelect.text = "Keyboard\nInput";
                 selectionState = "Main/KeyboardInput";
                 break;
-            /*
+            
             ----------------
             RGB
             ----------------
-            */
+            
             
             case "ColorRGB/LL":
                 // CHANGE TO RR
@@ -379,7 +380,7 @@ UP DOWN LEFT RIGHT ARROWS
             ----------------
             EYE
             ----------------
-            */
+            
             case "EyeAdapt/L":
                 // CHANGE TO R
                 Left_Eye_ALL_SLIDERS.SetActive(false);
@@ -410,7 +411,7 @@ UP DOWN LEFT RIGHT ARROWS
             ----------------
             MAIN
             ----------------
-            */
+            
             case "Main/ColorRGB":
                 // CHANGE TO HSV
                 textMeshSelect.text = "Color\nHSV";
@@ -451,7 +452,7 @@ UP DOWN LEFT RIGHT ARROWS
             ----------------
             RGB
             ----------------
-            */
+            
             case "ColorRGB/LL":
                 // CHANGE TO LR
                 LL_ALL_SLIDERS.SetActive(false);
@@ -490,7 +491,7 @@ UP DOWN LEFT RIGHT ARROWS
             ----------------
             EYE
             ----------------
-            */
+            
             case "EyeAdapt/L":
                 // CHANGE TO R
                 Left_Eye_ALL_SLIDERS.SetActive(false);
@@ -531,7 +532,7 @@ UP DOWN LEFT RIGHT ARROWS
 --------------------------
 SELECTION AND EXIT CONTROL
 --------------------------
-*/
+
 
     void OnSelectButtonClick()
     {
@@ -699,7 +700,7 @@ SELECTION AND EXIT CONTROL
 -----------------
 RGB WALL VALUE SLIDERS
 -----------------
-*/
+
 
     void OnLL_RedValueChanged(float value)
     {
@@ -843,7 +844,7 @@ RGB WALL VALUE SLIDERS
 -----------------
 EYE VALUE SLIDERS
 -----------------
-*/
+
 
     void OnLERValueChanged(float value)
     {
@@ -906,3 +907,4 @@ EYE VALUE SLIDERS
     }
 
 }
+*/
