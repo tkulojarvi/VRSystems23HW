@@ -192,7 +192,7 @@ public class StereoColor : MonoBehaviour
         {
             // Get the Renderer components
             Material backwall_LL_Material = backwallLL.GetComponent<Renderer>().material;
-            Debug.Log("nnnnnnnnnnnnnnnnnnnn");
+            
             // Set the color of the backwallLeft and backwallRight components
             backwall_LL_Material.color = StringToColor(color);
         }
@@ -207,8 +207,8 @@ public class StereoColor : MonoBehaviour
         if(color != null && CheckValidString(color) == true)
         {
             // Get the Renderer components
-            Material backwall_LR_Material = backwallLL.GetComponent<Renderer>().material;
-
+            Material backwall_LR_Material = backwallLR.GetComponent<Renderer>().material;
+            
             // Set the color of the backwallLeft and backwallRight components
             backwall_LR_Material.color = StringToColor(color);
         }
@@ -223,8 +223,8 @@ public class StereoColor : MonoBehaviour
         if(color != null && CheckValidString(color) == true)
         {
             // Get the Renderer components
-            Material backwall_RL_Material = backwallLL.GetComponent<Renderer>().material;
-
+            Material backwall_RL_Material = backwallRL.GetComponent<Renderer>().material;
+            
             // Set the color of the backwallLeft and backwallRight components
             backwall_RL_Material.color = StringToColor(color);
         }
@@ -239,8 +239,8 @@ public class StereoColor : MonoBehaviour
         if(color != null && CheckValidString(color) == true)
         {
             // Get the Renderer components
-            Material backwall_RR_Material = backwallLL.GetComponent<Renderer>().material;
-
+            Material backwall_RR_Material = backwallRR.GetComponent<Renderer>().material;
+            
             // Set the color of the backwallLeft and backwallRight components
             backwall_RR_Material.color = StringToColor(color);
         }
