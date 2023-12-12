@@ -259,7 +259,7 @@ public class StereoColor : MonoBehaviour
     {
         if(color != null && CheckValidString(color) == true)
         {
-            ColorFade.Instance.screenColorL = StringToColor(color);
+            EyeAdaptation.Instance.screenColorL = StringToColor(color);
         }
         else
         {
@@ -271,7 +271,7 @@ public class StereoColor : MonoBehaviour
     {
         if(color != null && CheckValidString(color) == true)
         {
-            ColorFade.Instance.screenColorR = StringToColor(color);
+            EyeAdaptation.Instance.screenColorR = StringToColor(color);
         }
         else
         {
@@ -284,7 +284,7 @@ public class StereoColor : MonoBehaviour
         // Attempt to parse the string into a float
         if (float.TryParse(time, out adaptationTimerInput))
         {
-            ColorFade.Instance.fadeDuration = adaptationTimerInput;
+            EyeAdaptation.Instance.fadeDuration = adaptationTimerInput;
         }
         else
         {
@@ -421,7 +421,14 @@ public class StereoColor : MonoBehaviour
         else
         {
             string[] hsv = color.Split(',');
-            return new Color(int.Parse(hsv[0]) / 360f, int.Parse(hsv[1]) / 100f, int.Parse(hsv[2]) / 100f);
+
+            float h = int.Parse(hsv[0]) / 360f;
+            float s = int.Parse(hsv[1]) / 100f;
+            float v = int.Parse(hsv[2]) / 100f;
+
+            //Create an RGB color from the HSV values
+            Color newCol = Color.HSVToRGB(h, s, v);
+            return newCol;
         }
     }
 

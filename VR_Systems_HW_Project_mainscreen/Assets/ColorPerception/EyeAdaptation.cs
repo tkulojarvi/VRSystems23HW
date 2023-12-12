@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class ColorFade : MonoBehaviour
+public class EyeAdaptation : MonoBehaviour
 {
-    public static ColorFade Instance; // instance
+    public static EyeAdaptation Instance; // instance
 
     public Toggle eyeToggle;
     public GameObject instructions;
@@ -15,10 +15,11 @@ public class ColorFade : MonoBehaviour
     public Image rightPreview;
 
 
-    public Camera leftStereoCam;
-    public Camera rightStereoCam;
-    private Color originalColorL;
-    private Color originalColorR;
+    public Image LScreenImage;  // Drag and drop your UI Image here
+    public Image RScreenImage;  // Drag and drop your UI Image here
+
+    public GameObject LeftCamera;
+    public GameObject RightCamera;
 
 
     public float fadeDuration = 5f;  // Duration for the screen effect in seconds
@@ -41,8 +42,8 @@ public class ColorFade : MonoBehaviour
 
     void Start()
     {
-        originalColorL = leftStereoCam.backgroundColor;
-        originalColorR = rightStereoCam.backgroundColor;
+        LScreenImage.color = Color.clear;  // Make sure the image is initially transparent
+        RScreenImage.color = Color.clear;  // Make sure the image is initially transparent
     }
 
     void OnEnable()
@@ -63,42 +64,31 @@ public class ColorFade : MonoBehaviour
     {
         Preview();
         
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (Keyboard.current.fKey.wasPressedThisFrame)
         {
+            Debug.Log("fkey");
             StartCoroutine(TurnScreenColor());
         }
     }
 
     IEnumerator TurnScreenColor()
     {
-        // Fading in
-        float timer = 0f;
-        
-        while (timer < fadeDuration)
-        {
-            timer += Time.deltaTime;
-            float progress = timer / fadeDuration;
-            leftStereoCam.backgroundColor = Color.Lerp(originalColorL, screenColorL, progress);
-            rightStereoCam.backgroundColor = Color.Lerp(originalColorR, screenColorR, progress);
-            yield return null;
-        }
+        LeftCamera.SetActive(true);
+        RightCamera.SetActive(true);
+
+        LScreenImage.color = screenColorL;
+        RScreenImage.color = screenColorR;
 
         yield return new WaitForSeconds(fadeDuration);
 
-        // Fading out
-        timer = 0f;
-        while (timer < fadeDuration)
-        {
-            timer += Time.deltaTime;
-            float progress = timer / fadeDuration;
-            leftStereoCam.backgroundColor = Color.Lerp(screenColorL, originalColorL, progress);
-            rightStereoCam.backgroundColor = Color.Lerp(screenColorR, originalColorR, progress);
-            yield return null;
-        }
-
         // Ensure the final color is completely clear
-        leftStereoCam.backgroundColor = originalColorL;
-        rightStereoCam.backgroundColor = originalColorR;
+        LScreenImage.color = Color.clear;
+        RScreenImage.color = Color.clear;
+
+        LeftCamera.SetActive(false);
+        RightCamera.SetActive(false);
+
+        Debug.Log("complete");
     }
 
     void Preview()
