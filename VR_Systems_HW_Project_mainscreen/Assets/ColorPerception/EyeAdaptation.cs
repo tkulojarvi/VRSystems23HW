@@ -64,9 +64,9 @@ public class EyeAdaptation : MonoBehaviour
     {
         Preview();
         
-        if (Keyboard.current.fKey.wasPressedThisFrame)
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            Debug.Log("fkey");
+            Debug.Log("spacekey");
             StartCoroutine(TurnScreenColor());
         }
     }
