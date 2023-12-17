@@ -361,6 +361,7 @@ public class StereoColor : MonoBehaviour
             if (uwr.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(uwr.error);
+                DisplayErrorMessage();
             }
             else
             {
